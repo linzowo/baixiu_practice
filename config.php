@@ -18,4 +18,4 @@ define('DB_PASS','111111');
 /**
  * 数据库名称
  */
-define('DB_NAME','baixiu');
+define('DB_NAME','baixiu-dev');
