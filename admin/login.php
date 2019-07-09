@@ -1,4 +1,9 @@
 <?php
+// 如果已经登录成功就不再显示登录页
+if(!empty($_SESSION['user'])){
+  header('Location: /admin/');
+  exit;
+}
 // 引入依赖的配置文件
 include_once '../config.php';
 
@@ -51,7 +56,10 @@ function login()
   // 响应
   // 执行到此说明用户输入的信息正确，跳转至主页
   $_SESSION['user'] = $user;
-  header('Location: /admin/');
+  echo $_SESSION['source'];
+  $locationUrl = "Location: ".(empty($_SESSION['source'])?'/admin/':$_SESSION['source']);
+  echo $locationUrl;
+  header($locationUrl);
 }
 
 if (!empty($_POST)) {
