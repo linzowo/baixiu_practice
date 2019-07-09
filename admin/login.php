@@ -1,9 +1,16 @@
 <?php
-// 引入依赖的配置文件
-include_once '../config.php';
-
 // 启动session
 session_start();
+// echo $_SERVER['SCRIPT_NAME'];
+// echo $_SERVER['PHP_SELF']; 
+
+// 用户登录前访问的地址
+// if(!empty($_GET['source'])){
+//   echo $_GET['source'];
+
+// }
+// 引入依赖的配置文件
+include_once '../config.php';
 
 // 登录处理函数
 function login()
@@ -51,7 +58,8 @@ function login()
   // 响应
   // 执行到此说明用户输入的信息正确，跳转至主页
   $_SESSION['user'] = $user;
-  header('Location: /admin/');
+  $targetUrl = "Location: ".(empty($_GET['source'])?"/admin/":"{$_GET['source']}");
+  header($targetUrl);
 }
 
 if (!empty($_POST)) {
@@ -71,7 +79,7 @@ if (!empty($_POST)) {
 
 <body>
   <div class="login">
-    <form class="login-wrap<?php echo empty($error_msg)?'':' shake animated'; ?>" action="<?php echo $_SERVER['PHP_SELF']; ?>" method='post' novalidate autocomplete='off'>
+    <form class="login-wrap<?php echo empty($error_msg)?'':' shake animated'; ?>" action="<?php echo $_SERVER['PHP_SELF'].empty($_GET['source'])?'':"?source{$_GET['source']}"; ?>" method='post' novalidate autocomplete='off'>
       <img class="avatar" src="/static/assets/img/default.png">
       <!-- 有错误信息时展示 -->
       <?php if (isset($error_msg)) :; ?>

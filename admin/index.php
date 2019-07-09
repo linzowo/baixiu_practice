@@ -3,7 +3,7 @@
 session_start();
 // 接收登录信息，如果没有登录就返回登录界面
 if(empty($_SESSION['user'])){
-  header('Location: /admin/login.php');
+  header("Location: /admin/login.php?source={$_SERVER['SCRIPT_NAME']}");
   exit;
 }
 ?>
