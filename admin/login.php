@@ -8,18 +8,11 @@
 // -->
 // 引入依赖的配置文件
 include_once '../config.php';
+include_once '../function.php';
 ?>
 <?php
 // 启动session
 session_start();
-// echo $_SERVER['SCRIPT_NAME'];
-// echo $_SERVER['PHP_SELF']; 
-
-// 用户登录前访问的地址
-// if(!empty($_GET['source'])){
-//   echo $_GET['source'];
-
-// }
 // 引入依赖的配置文件
 include_once '../config.php';
 
@@ -44,20 +37,13 @@ function login()
     return;
   }
   // 判断用户输入的邮箱是否存在于数据库中
-  // 连接数据库
-  $conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-  if (!$conn) { // 数据库连接失败
-    exit("<h1>连接数据库失败，请重试！</h1>");
-  }
-  // 建立查询
+  // 建立查询语句
   $user_email = $_POST['email'];
-  $query = mysqli_query($conn, "SELECT * FROM users WHERE email = '{$user_email}' LIMIT 1;");
-  if (!$query) {
-    $GLOBALS['error_msg'] = '获取数据失败，请重试！';
-    return;
-  }
+  $query = "SELECT * FROM users WHERE email = '{$user_email}' LIMIT 1;";
+  // 连接数据库
+  $res = bx_get_db_data($query);
   // 获取用户信息
-  $user = mysqli_fetch_assoc($query);
+  $user = mysqli_fetch_assoc($res);
   // 判断邮箱是否在数据库中
   if (!$user) {
     // 用户名不存在
@@ -75,9 +61,7 @@ function login()
   // 响应
   // 执行到此说明用户输入的信息正确，跳转至主页
   $_SESSION['user'] = $user;
-  echo $_SESSION['source'];
   $locationUrl = "Location: " . (empty($_SESSION['source']) ? '/admin/' : $_SESSION['source']);
-  echo $locationUrl;
   header($locationUrl);
 }
 

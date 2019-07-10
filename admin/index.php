@@ -1,13 +1,6 @@
 <?php 
-// 启动session
-session_start();
-// 接收登录信息，如果没有登录就返回登录界面
-if(empty($_SESSION['user'])){
-  // 存储一个请求源===》方便登录之后返回此页面
-  $_SESSION['source'] = '/admin/';
-  header("Location: /admin/login.php");
-  exit;
-}
+require_once '../function.php';
+bx_check_login_status();
 ?>
 <!DOCTYPE html>
 <!--
@@ -15,7 +8,7 @@ if(empty($_SESSION['user'])){
  * @Date: 2019-07-08 15:13:08
  * @LastEditors: linzwo
  * @LastEditTime: 2019-07-08 20:21:52
- * @Description: file content
+ * @Description: 管理员主页
  -->
 <html lang="zh-CN">
   <head>

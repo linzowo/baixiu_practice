@@ -10,8 +10,8 @@
  <?php $current_page = isset($current_page)?$current_page:''; ?>
 <div class="aside">
   <div class="profile">
-    <img class="avatar" src="/static/uploads/avatar.jpg" />
-    <h3 class="name">布头儿</h3>
+    <img class="avatar" src="<?php echo $_SESSION['user']['avatar']; ?>" />
+    <h3 class="name"><?php echo $_SESSION['user']['nickname']; ?></h3>
   </div>
   <ul class="nav">
     <li class="<?php echo $current_page === 'index'?'active':''; ?>">

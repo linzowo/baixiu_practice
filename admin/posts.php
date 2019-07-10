@@ -1,3 +1,7 @@
+<?php 
+require_once '../function.php';
+bx_check_login_status();
+?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
