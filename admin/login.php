@@ -123,43 +123,26 @@ if (!empty($_POST)) {
   <!-- 引入jquery -->
   <script src="/static/assets/vendors/jquery/jquery.min.js"></script>
   <script>
-    // 通过js在用户输入完邮箱后就获取用户在数据库中存放的头像
+    $(function(){
+      // 通过js在用户输入完邮箱后就获取用户在数据库中存放的头像
+      // 获取元素
+      var email = $('#email');
     // 为邮箱输入框注册失去焦点事件
-    $('#email').blur(function() {
-      // 判断是否存在报错的span
-      if($('#email').siblings('span')){
-        // 将其删除
-        $('#email').siblings('span').remove();
-      }
-      // 判断用户输入的邮箱是否合法
-      if(!(/[0-9a-zA-Z._-]+[@][0-9a-zA-Z._-]+[.][a-zA-Z]/.test($('#email').val()))){
-        // 不合法就提示用户
-        $('#email').parent('div').append($('<span>邮箱格式不正确请重新输入</span>'));
-        return;
-      }
-
+    email.blur(function() {
+        // 不合法就不发起ajax请求
+      if(!(/^[0-9a-zA-Z._-]+[@][0-9a-zA-Z._-]+[.][a-zA-Z]+$/.test(email.val()))) return;
+        
       // 合法就发起ajax请求
-      $.ajax({
-        url: '/admin/api/avatar.php', // 请求处理地址
-        type: 'get', //请求方法
-        dataType: 'json', // 声明返回的文件类型
-        data: {
-          email: $(this).val()
-        }, // 传递过去的参数==》获取时根据请求方法获取
-        success: function(data) { // 请求成功且返回数据正确
-          if(!data){// 如果没有拿到数据就说明没有这个用户
-            $('#email').parent('div').append($('<span>该用户不存在，请注册！</span>'));
-            $('.avatar')[0].src = "/static/assets/img/default.png";
-            return;
-          }
-          // 输出用户头像到页面
-          $('.avatar')[0].src = data['avatar'];
-        },
-        error: function() {
-          console.log('请求错误');
+      $.get('/admin/api/avatar.php',{'email': email.val()},function(res){// 请求成功且返回数据正确
+        if(res === ' '){// 如果数据为空就说明没有这个用户
+          $('.avatar')[0].src = "/static/assets/img/default.png";
+          return;
         }
-      })
+        // 输出用户头像到页面
+        $('.avatar')[0].src = res;
+      });
     });
+    })
   </script>
 </body>
 

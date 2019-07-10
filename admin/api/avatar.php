@@ -15,33 +15,22 @@ include_once '../../config.php';
         }
         // 建立查询
         $user_email = $_GET['email'];
-        $query = mysqli_query($conn, "SELECT * FROM users WHERE email = '{$user_email}' LIMIT 1;");
+        $query = mysqli_query($conn, "SELECT avatar FROM users WHERE email = '{$user_email}' LIMIT 1;");
         if (!$query) {
-            $GLOBALS['error_msg'] = '获取数据失败，请重试！';
-            return;
+            exit("建立查询失败");
         }
         // 获取用户信息
-        $user = mysqli_fetch_assoc($query);
+        $user_avatar = mysqli_fetch_assoc($query);
+
+        if(!$user_avatar){ // 查询结果为空说明没有这个用户
+            exit;
+        }
         // 输出用户信息
-        echo json_encode($user);
+        echo $user_avatar['avatar'];
         /* 
-         array(8) {
-            ["id"]=>
-            string(1) "1"
-            ["slug"]=>
-            string(5) "admin"
-            ["email"]=>
-            string(16) "admin@linzowo.me"
-            ["password"]=>
-            string(6) "111111"
-            ["nickname"]=>
-            string(9) "管理员"
+         array(1) { 
             ["avatar"]=>
             string(26) "/static/uploads/avatar.jpg"
-            ["bio"]=>
-            NULL
-            ["status"]=>
-            string(9) "activated"
             }
         */
         exit;
