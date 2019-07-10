@@ -139,7 +139,13 @@ if (!empty($_POST)) {
           return;
         }
         // 输出用户头像到页面
-        $('.avatar')[0].src = res;
+        var avatar = $('.avatar');
+        avatar.fadeOut(function(){
+          $(this).on('load',function(){
+            // 等图片加载完成后再使其进入页面
+            $(this).fadeIn();
+          }).attr('src',res);
+        })
       });
     });
     })
