@@ -1,9 +1,59 @@
-<?php 
+<?php
 require_once '../function.php';
 bx_check_login_status();
 ?>
+<?php
+// 获取数据库已有数据
+// 获取数据
+
+// 建立查询语句
+$sql = "SELECT `name`,`slug` FROM categories;";
+$res = bx_get_db_data($sql);
+/* 
+$res===>
+array(4) {
+  [0]=&gt;
+  array(2) {
+    ["name"]=&gt;
+    string(9) "未分类"
+    ["slug"]=&gt;
+    string(13) "uncategorized"
+  }
+  [1]=&gt;
+  array(2) {
+    ["name"]=&gt;
+    string(9) "奇趣事"
+    ["slug"]=&gt;
+    string(5) "funny"
+  }
+  [2]=&gt;
+  array(2) {
+    ["name"]=&gt;
+    string(9) "会生活"
+    ["slug"]=&gt;
+    string(6) "living"
+  }
+  [3]=&gt;
+  array(2) {
+    ["name"]=&gt;
+    string(9) "爱旅行"
+    ["slug"]=&gt;
+    string(6) "travel"
+  }
+}
+
+*/
+// 渲染至页面
+
+// 用户新增数据
+
+
+// exit;
+?>
+
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <title>Categories &laquo; Admin</title>
@@ -13,8 +63,11 @@ bx_check_login_status();
   <link rel="stylesheet" href="/static/assets/css/admin.css">
   <script src="/static/assets/vendors/nprogress/nprogress.js"></script>
 </head>
+
 <body>
-  <script>NProgress.start()</script>
+  <script>
+    NProgress.start()
+  </script>
 
   <div class="main">
     <?php include 'inc/navbar.php'; ?>
@@ -59,33 +112,25 @@ bx_check_login_status();
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td>未分类</td>
-                <td>uncategorized</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td>未分类</td>
-                <td>uncategorized</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td>未分类</td>
-                <td>uncategorized</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
+              <?php foreach ($res as $value) :; ?>
+                <tr>
+                  <td class="text-center"><input type="checkbox"></td>
+                  <td><?php echo $value['name']; ?></td>
+                  <td><?php echo $value['slug']; ?></td>
+                  <td class="text-center">
+                    <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
+                    <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+                    <!-- 
+                      编辑方案：
+                        --跳转到新页面==》载入已有数据==》用户修改==》存储到数据库==》返回页面
+                        --本页修改==》将数据加载至左边的新分类目录==》用户修改==》存储到数据库==》刷新页面
+                      删除方案：
+                        --跳转页面删除
+                        --ajax发起删除请求
+                     -->
+                  </td>
+                </tr>
+              <?php endforeach; ?>
             </tbody>
           </table>
         </div>
@@ -94,10 +139,13 @@ bx_check_login_status();
   </div>
 
   <?php $current_page = 'categories'; ?>
-    <?php include 'inc/slider.php'; ?>
+  <?php include 'inc/slider.php'; ?>
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
-  <script>NProgress.done()</script>
+  <script>
+    NProgress.done()
+  </script>
 </body>
+
 </html>
