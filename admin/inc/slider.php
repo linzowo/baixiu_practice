@@ -22,7 +22,7 @@
       <a href="#menu-posts" class="collapsed" data-toggle="collapse">
         <i class="fa fa-thumb-tack"></i>文章<i class="fa fa-angle-right"></i>
       </a>
-      <ul id="menu-posts" class="collapse">
+      <ul id="menu-posts" class="collapse<?php echo in_array($current_page,$menuPostsArr)?' in':''; ?>">
         <li class="<?php echo $current_page === 'posts'?'active':''; ?>"><a href="/admin/posts.php">所有文章</a></li>
         <li class="<?php echo $current_page === 'post-add'?'active':''; ?>"><a href="/admin/post-add.php">写文章</a></li>
         <li class="<?php echo $current_page === 'categories'?'active':''; ?>"><a href="/admin/categories.php">分类目录</a></li>
@@ -39,7 +39,7 @@
       <a href="#menu-settings" class="collapsed" data-toggle="collapse">
         <i class="fa fa-cogs"></i>设置<i class="fa fa-angle-right"></i>
       </a>
-      <ul id="menu-settings" class="collapse">
+      <ul id="menu-settings" class="collapse<?php echo in_array($current_page,$menuSettingsArr)?' in':''; ?>">
         <li class="<?php echo $current_page === 'nav-menus'?'active':''; ?>"><a href="/admin/nav-menus.php">导航菜单</a></li>
         <li class="<?php echo $current_page === 'slides'?'active':''; ?>"><a href="/admin/slides.php">图片轮播</a></li>
         <li class="<?php echo $current_page === 'settings'?'active':''; ?>"><a href="/admin/settings.php">网站设置</a></li>

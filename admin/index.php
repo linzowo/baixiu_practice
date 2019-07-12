@@ -6,25 +6,31 @@ bx_check_login_status();
 // 获取站点需要的数据
 // 查询语句列表
 $queryArr = [
-  'query_posts_count' => "SELECT COUNT(1) FROM posts;", // 文章总数
-  'query_posts_published_count' => "SELECT COUNT(1)  FROM posts WHERE `status`= 'published';", // 草稿数
-  'query_categories_count' => "SELECT COUNT(1) FROM categories;", // 分类数
-  'query_comments_count' => "SELECT COUNT(1) FROM comments;", // 评论数
-  'query_comments_approved_count' => "SELECT COUNT(1) FROM comments WHERE `status`='approved';" // 待审核评论
+  'query_posts_count' => "SELECT COUNT(1) as num FROM posts;", // 文章总数
+  'query_posts_published_count' => "SELECT COUNT(1) as num  FROM posts WHERE `status`= 'published';", // 草稿数
+  'query_categories_count' => "SELECT COUNT(1) as num FROM categories;", // 分类数
+  'query_comments_count' => "SELECT COUNT(1) as num FROM comments;", // 评论数
+  'query_comments_held_count' => "SELECT COUNT(1) as num FROM comments WHERE `status`='held';" // 待审核评论
 ];
 $resArr = [
-  'res_posts_count' =>'',
-  'res_posts_published_count' =>'',
-  'res_categories_count' =>'',
-  'res_comments_count' =>'',
-  'res_comments_approved_count' =>''
+  'res_posts_count' => '',
+  'res_posts_published_count' => '',
+  'res_categories_count' => '',
+  'res_comments_count' => '',
+  'res_comments_held_count' => ''
 ];
 // 获取数据
 foreach ($queryArr as $key => $value) {
-  $resKey = 'res'.substr($key,5);
   $res = bx_get_db_data($value);
-  $resArr[$resKey] = mysqli_fetch_assoc($res)['COUNT(1)'];
+  // array(1) { ["num"]=> string(1) "4" }
+  $resKey = 'res' . substr($key, 5);
+  // 如果查询结果不存在就将该值设置为0
+  if (empty($res['num'])) {
+    $resArr[$resKey] = 0;
+  }
+  $resArr[$resKey] = $res['num'];
 }
+// exit();
 ?>
 <!DOCTYPE html>
 <!--
@@ -69,16 +75,18 @@ foreach ($queryArr as $key => $value) {
             </div>
             <ul class="list-group">
               <li class="list-group-item">
-                <strong><?php echo empty($resArr['res_posts_count'])?0:$resArr['res_posts_count']; ?></strong>篇文章（<strong><?php echo empty($resArr['res_posts_published_count'])?0:$resArr['res_posts_published_count']; ?></strong>篇草稿）
+                <strong><?php echo $resArr['res_posts_count']; ?></strong>篇文章（<strong><?php echo $resArr['res_posts_published_count']; ?></strong>篇草稿）
               </li>
-              <li class="list-group-item"><strong><?php echo empty($resArr['res_categories_count'])?0:$resArr['res_categories_count']; ?></strong>个分类</li>
+              <li class="list-group-item"><strong><?php echo $resArr['res_categories_count']; ?></strong>个分类</li>
               <li class="list-group-item">
-                <strong><?php echo empty($resArr['res_comments_count'])?0:$resArr['res_comments_count']; ?></strong>条评论（<strong><?php echo empty($resArr['res_comments_approved_count'])?0:$resArr['res_comments_approved_count']; ?></strong>条待审核）
+                <strong><?php echo $resArr['res_comments_count']; ?></strong>条评论（<strong><?php echo $resArr['res_comments_held_count']; ?></strong>条待审核）
               </li>
             </ul>
           </div>
         </div>
-        <div class="col-md-4"></div>
+        <div class="col-md-4">
+          <canvas id="myChart" width="400" height="400"></canvas>
+        </div>
         <div class="col-md-4"></div>
       </div>
     </div>
@@ -91,6 +99,41 @@ foreach ($queryArr as $key => $value) {
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
   <script>
     NProgress.done();
+  </script>
+  <script src="../static/assets/vendors/chart/chart2.8.js"></script>
+  <script>
+    var ctx = $('#myChart');
+    var myChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['文章', '分类', '评论'],
+        datasets: [{
+            label: '# of Votes',
+            data: [<?php echo $resArr['res_posts_count'] . ',' . $resArr['res_categories_count'] . ',' . $resArr['res_comments_count']; ?>],
+            backgroundColor: [
+              'pink',
+              'hotpink',
+              'deeppink'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)'
+            ],
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        }
+      }
+    });
   </script>
 </body>
 

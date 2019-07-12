@@ -23,6 +23,10 @@ function bx_check_login_status()
 
 /**
  * 获取数据库信息
+ * @param string $query==>sql查询语句
+ * @return false|array
+ * ==>如果返回多条数据==>array[array[key:value],array[key:value],...]
+ * ==>返回一条数据==>array[key:value]
   */
 function bx_get_db_data($query){
     // 引入配置文件
@@ -35,8 +39,17 @@ function bx_get_db_data($query){
     // 建立查询
     $res = mysqli_query($conn, $query);
     if (!$res) {
-        exit("建立查询失败");
+        return false;
     }
-    return $res;
+
+    while($row = mysqli_fetch_assoc($res)){
+        $result[] = $row;
+    }
+    // 如果只有一条数据就返回这一条数据
+    if(count($result) == 1){
+        return $result[0];
+    }
+    // 如果是多条数据就返回结果数组
+    return $result;
 
 }
