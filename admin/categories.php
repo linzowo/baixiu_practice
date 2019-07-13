@@ -11,32 +11,30 @@ bx_check_login_status();
 function add_categories()
 {
   // 校验
-  if (empty($_POST['name'])) {
-    $GLOBALS['error_msg'] = '请输入分类名称';
-    return;
-  }
-  if (empty($_POST['slug'])) {
-    $GLOBALS['error_msg'] = '请输入slug';
+  if (empty($_POST['name']) || empty($_POST['slug'])) {
+    $GLOBALS['msg'] = '请填写完整表单';
     return;
   }
   // 因为slug标识是唯一的==》需要判重
   // 建立查询语句
   $check_slug_sql = "SELECT slug FROM categories WHERE slug = '{$_POST['slug']}';";
   $check_slug_query = bx_get_db_data($check_slug_sql);
-  if($check_slug_query){
-    $GLOBALS['error_msg'] = '此slug以存在，请重新输入';
+  if ($check_slug_query) {
+    $GLOBALS['msg'] = '此slug已存在，请重新输入';
     return;
   }
   // 持久化
   // 存入数据库
   // 建立查询语句
   $sql = "INSERT INTO categories (`name`,slug) VALUES ('{$_POST['name']}','{$_POST['slug']}');";
-  if(!bx_add_data_to_db($sql)){
-    $GLOBALS['error_msg'] = '添加到数据库失败';
-    return;
-  };
+  // var_dump(bx_add_data_to_db($sql));
+  $add = bx_add_data_to_db($sql);
+  $GLOBALS['success'] = $add > 0;
+  $GLOBALS['msg'] = $add <= 0 ? '添加失败' : '添加成功';
   // 响应
 }
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   /* 
   $_POST===>array(2) { ["name"]=> string(10) " 林除夕" ["slug"]=> string(3) "adc" }
@@ -51,9 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // 建立查询语句
 $sql = "SELECT * FROM categories;";
-$res = bx_get_db_data($sql);
+$res_categories = bx_get_db_data($sql);
 /* 
-$res===>
+$res_categories===>
 array(6) {
   [0]=&gt;
   array(3) {
@@ -100,10 +98,16 @@ array(6) {
         <h1>分类目录</h1>
       </div>
       <!-- 有错误信息时展示 -->
-      <?php if (!empty($error_msg)) :; ?>
-        <div class="alert alert-danger">
-          <strong>错误！</strong><?php echo $error_msg; ?>
-        </div>
+      <?php if (!empty($msg)) :; ?>
+        <?php if ($success) :; ?>
+          <div class="alert alert-success">
+            <strong>成功！</strong><?php echo $msg; ?>
+          </div>
+        <?php else :; ?>
+          <div class="alert alert-danger">
+            <strong>错误！</strong><?php echo $msg; ?>
+          </div>
+        <?php endif; ?>
       <?php endif; ?>
       <div class="row">
         <div class="col-md-4">
@@ -111,11 +115,11 @@ array(6) {
             <h2>添加新分类目录</h2>
             <div class="form-group">
               <label for="name">名称</label>
-              <input id="name" name="name" class="form-control" name="name" type="text" placeholder="分类名称" value="<?php echo empty($_POST['name'])?'':$_POST['name']; ?>">
+              <input id="name" name="name" class="form-control" name="name" type="text" placeholder="分类名称" value="<?php echo (empty($_POST['name']) || $success) ? '' : $_POST['name']; ?>">
             </div>
             <div class="form-group">
               <label for="slug">别名</label>
-              <input id="slug" name="slug" class="form-control" name="slug" type="text" placeholder="slug" value="<?php echo empty($_POST['slug'])?'':$_POST['slug']; ?>">
+              <input id="slug" name="slug" class="form-control" name="slug" type="text" placeholder="slug" value="<?php echo (empty($_POST['slug']) || $success) ? '' : $_POST['slug']; ?>">
               <p class="help-block">https://zce.me/category/<strong>slug</strong></p>
             </div>
             <div class="form-group">
@@ -126,7 +130,7 @@ array(6) {
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
-            <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
+            <a id="batch_deletion" class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
           </div>
           <table class="table table-striped table-bordered table-hover">
             <thead>
@@ -138,22 +142,22 @@ array(6) {
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($res as $value) :; ?>
+              <?php foreach ($res_categories as $value) :; ?>
                 <tr>
-                  <td class="text-center"><input type="checkbox"></td>
+                  <td class="text-center"><input type="checkbox" id="<?php echo $value['id']; ?>"></td>
                   <td><?php echo $value['name']; ?></td>
                   <td><?php echo $value['slug']; ?></td>
                   <td class="text-center">
                     <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
                     <a href="/admin/api/delete-categorie.php?id=<?php echo $value['id']; ?>" class="btn btn-danger btn-xs">删除</a>
                     <!-- 
-                          编辑方案：
-                            --跳转到新页面==》载入已有数据==》用户修改==》存储到数据库==》返回页面
-                            --本页修改==》将数据加载至左边的新分类目录==》用户修改==》存储到数据库==》刷新页面
-                          删除方案：
-                            --跳转页面删除
-                            --ajax发起删除请求
-                         -->
+                                  编辑方案：
+                                    --跳转到新页面==》载入已有数据==》用户修改==》存储到数据库==》返回页面
+                                    --本页修改==》将数据加载至左边的新分类目录==》用户修改==》存储到数据库==》刷新页面
+                                  删除方案：
+                                    --跳转页面删除
+                                    --ajax发起删除请求
+                                 -->
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -171,6 +175,68 @@ array(6) {
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
   <script>
     NProgress.done()
+  </script>
+  <script>
+    $(function() {
+      // 创建一个结果数组
+      var deleteIdArr = [];
+      // 获取元素
+      // 批量删除按钮
+      var batch_deletion = $('#batch_deletion');
+      // 全选按钮
+      var checkboxAllObj = $('thead input:checkbox');
+      // 单选按钮
+      var checkboxOneArr = $('tbody input:checkbox');
+
+      // 为全选框注册点击事件
+      checkboxAllObj.on('click', function() {
+        // 所有单选框的状态随全选框状态变化而变化==>全选将所有选择的id加入数组==>全不选将所有id删除
+
+        // 清空数组
+        deleteIdArr = [];
+
+        for (var i = 0; i < checkboxOneArr.length; i++) {
+          if (this.checked) {
+            deleteIdArr.push(checkboxOneArr[i].id);
+          }
+          checkboxOneArr[i].checked = this.checked;
+        }
+
+        // 批量删除按钮显示/隐藏
+        deleteIdArr.length == 0 ? batch_deletion.hide() : batch_deletion.show();
+        // console.log(deleteIdArr);
+      });
+
+      // 为每个tbody中的input注册点击事件
+      checkboxOneArr.on('click', function() {
+        // 改变当前点击按钮的状态并且将批量删除按钮显示出来
+
+        // 检查当前元素的选中状态===》删除还是新增id到数组中
+        this.checked ? deleteIdArr.push(this.id) : deleteIdArr.splice(deleteIdArr.indexOf(this.id), 1);
+        // 检查所有的元素
+        checkboxOneArr = $('tbody input:checkbox');
+        for (var i = 0; i < checkboxOneArr.length; i++) {
+          // 检测是否全选
+          if (!checkboxOneArr[i].checked) {
+            // 存在没有选择的
+            checkboxAllObj[0].checked = false;
+            break;
+          }
+          // 执行到此说明所有的单选按钮都选择了
+          checkboxAllObj[0].checked = true;
+        }
+
+        // 批量删除按钮显示/隐藏
+        deleteIdArr.length == 0 ? batch_deletion.hide() : batch_deletion.show();
+        // console.log(deleteIdArr);
+      });
+
+      // 用户点击批量删除
+      batch_deletion.on('click',function(){
+        var url = '/admin/api/delete-categorie.php?id='+deleteIdArr.join(',');
+        $(this).attr('href',url);
+      });
+    });
   </script>
 </body>
 
