@@ -144,20 +144,20 @@ array(6) {
             <tbody>
               <?php foreach ($res_categories as $value) :; ?>
                 <tr>
-                  <td class="text-center"><input type="checkbox" id="<?php echo $value['id']; ?>"></td>
+                  <td class="text-center"><input type="checkbox" data-id="<?php echo $value['id']; ?>"></td>
                   <td><?php echo $value['name']; ?></td>
                   <td><?php echo $value['slug']; ?></td>
                   <td class="text-center">
                     <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
                     <a href="/admin/api/delete-categorie.php?id=<?php echo $value['id']; ?>" class="btn btn-danger btn-xs">删除</a>
                     <!-- 
-                                  编辑方案：
-                                    --跳转到新页面==》载入已有数据==》用户修改==》存储到数据库==》返回页面
-                                    --本页修改==》将数据加载至左边的新分类目录==》用户修改==》存储到数据库==》刷新页面
-                                  删除方案：
-                                    --跳转页面删除
-                                    --ajax发起删除请求
-                                 -->
+                                        编辑方案：
+                                          --跳转到新页面==》载入已有数据==》用户修改==》存储到数据库==》返回页面
+                                          --本页修改==》将数据加载至左边的新分类目录==》用户修改==》存储到数据库==》刷新页面
+                                        删除方案：
+                                          --跳转页面删除
+                                          --ajax发起删除请求
+                                       -->
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -189,18 +189,18 @@ array(6) {
       var checkboxOneArr = $('tbody input:checkbox');
 
       // 为全选框注册点击事件
-      checkboxAllObj.on('click', function() {
+      checkboxAllObj.on('change', function() {
         // 所有单选框的状态随全选框状态变化而变化==>全选将所有选择的id加入数组==>全不选将所有id删除
 
         // 清空数组
         deleteIdArr = [];
-
-        for (var i = 0; i < checkboxOneArr.length; i++) {
-          if (this.checked) {
-            deleteIdArr.push(checkboxOneArr[i].id);
+        var checkboxAllObj = this;
+        checkboxOneArr.each(function(i, item) {
+          if ($(checkboxAllObj).prop('checked')) {
+            deleteIdArr.push($(item).data('id'));
           }
-          checkboxOneArr[i].checked = this.checked;
-        }
+          $(item).prop('checked', $(checkboxAllObj).prop('checked'));
+        });
 
         // 批量删除按钮显示/隐藏
         deleteIdArr.length == 0 ? batch_deletion.hide() : batch_deletion.show();
@@ -208,22 +208,36 @@ array(6) {
       });
 
       // 为每个tbody中的input注册点击事件
-      checkboxOneArr.on('click', function() {
+      checkboxOneArr.on('change', function() {
         // 改变当前点击按钮的状态并且将批量删除按钮显示出来
 
+        // 执行到此说明所有的单选按钮都选择了
+        checkboxAllObj.prop('checked', true);
+
         // 检查当前元素的选中状态===》删除还是新增id到数组中
-        this.checked ? deleteIdArr.push(this.id) : deleteIdArr.splice(deleteIdArr.indexOf(this.id), 1);
-        // 检查所有的元素
-        checkboxOneArr = $('tbody input:checkbox');
-        for (var i = 0; i < checkboxOneArr.length; i++) {
-          // 检测是否全选
-          if (!checkboxOneArr[i].checked) {
-            // 存在没有选择的
-            checkboxAllObj[0].checked = false;
-            break;
-          }
-          // 执行到此说明所有的单选按钮都选择了
-          checkboxAllObj[0].checked = true;
+        var dataId = $(this).data('id');
+
+        if ($(this).prop('checked')) { // 当前选项被选中
+          // 将id放入数组
+          deleteIdArr.push(dataId);
+
+          // 获取当前最新的元素信息
+          checkboxOneArr = $('tbody input:checkbox');
+          // 检查所有的元素
+          checkboxOneArr.each(function(i, item) {
+            // 检测是否全选
+            if (!$(item).prop('checked')) {
+              // 存在没有选择的
+              checkboxAllObj.prop('checked', false);
+              // 结束each循环
+              return false;
+            }
+          });
+        } else { // 当前选项被取消选中
+          // 将id删除
+          deleteIdArr.splice(deleteIdArr.indexOf(dataId), 1);
+          // 有选项被取消选中就肯定不是全选===》取消全选框选中状态
+          checkboxAllObj.prop('checked', false);
         }
 
         // 批量删除按钮显示/隐藏
@@ -232,9 +246,9 @@ array(6) {
       });
 
       // 用户点击批量删除
-      batch_deletion.on('click',function(){
-        var url = '/admin/api/delete-categorie.php?id='+deleteIdArr.join(',');
-        $(this).attr('href',url);
+      batch_deletion.on('click', function() {
+        var url = '/admin/api/delete-categorie.php?id=' + deleteIdArr.join(',');
+        $(this).prop('href', url);
       });
     });
   </script>
