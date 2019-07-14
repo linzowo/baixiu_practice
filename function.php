@@ -78,6 +78,14 @@ function bx_add_data_to_db($sql)
 }
 
 /**
+ * 修改数据传入数据库
+ */
+function bx_edit_data_to_db($sql)
+{
+    return bx_add_data_to_db($sql);
+}
+
+/**
  * 从数据库删除数据
  */
 function bx_delete_data_to_db($sql)

@@ -1,10 +1,12 @@
 <?php
+// 引入依赖
 require_once '../function.php';
+// 判断用户是否登录
 bx_check_login_status();
 ?>
 <?php
-// 用户新增数据
-// 判断是否有用户传入了数据
+
+// 新增数据开始===========================
 /**
  * 处理用户新增分类的函数
  */
@@ -13,16 +15,21 @@ function add_categories()
   // 校验
   if (empty($_POST['name']) || empty($_POST['slug'])) {
     $GLOBALS['msg'] = '请填写完整表单';
+    $GLOBALS['success'] = false;
     return;
   }
+  $GLOBALS['name'] = $_POST['name'];
+  $GLOBALS['slug'] = $_POST['slug'];
   // 因为slug标识是唯一的==》需要判重
   // 建立查询语句
   $check_slug_sql = "SELECT slug FROM categories WHERE slug = '{$_POST['slug']}';";
   $check_slug_query = bx_get_db_data($check_slug_sql);
   if ($check_slug_query) {
     $GLOBALS['msg'] = '此slug已存在，请重新输入';
+    $GLOBALS['success'] = false;
     return;
   }
+
   // 持久化
   // 存入数据库
   // 建立查询语句
@@ -33,20 +40,91 @@ function add_categories()
   $GLOBALS['msg'] = $add <= 0 ? '添加失败' : '添加成功';
   // 响应
 }
+// 新增数据结束===========================
 
+// 编辑数据开始==========================
+function show_edit_categories()
+{
+  // 校验
+  // 判断用户是否选择了编辑数据的标志
+  $GLOBALS['edit_flag'] = false;
+  // 没有传入编辑id==》显示本来的新增页面
+  if (empty($_GET['edit_id'])) return;
+  // 传入了编辑id==》判断id是否合法
+  // 获取要素
+  $editId = (int) $_GET['edit_id'];
+  // 是否是数字
+  if ($editId == 0) return;
+  // 是否存在数据库中
+  // 建立查询语句
+  $edit_sql = "SELECT * FROM categories WHERE `id`= '{$editId}';";
+  $edit_res = bx_get_db_data($edit_sql);
+  // array(3) { ["id"]=> string(1) "1" ["slug"]=> string(13) "uncategorized" ["name"]=> string(9) "未分类" }
+  if (!$edit_res) return;
+
+  // 执行到此说明查询数据存在
+  $GLOBALS['name'] = $edit_res['name'];
+  $GLOBALS['slug'] = $edit_res['slug'];
+  $GLOBALS['id'] = $edit_res['id'];
+  $GLOBALS['edit_flag'] = true;
+  // 响应
+}
+function edit_categories()
+{
+  if (empty($_POST['edit_name']) || empty($_POST['edit_slug'])) {
+    $GLOBALS['msg'] = '请填写完整表单';
+    $GLOBALS['success'] = false;
+    $GLOBALS['edit_flag'] = true;
+    return;
+  }
+  $GLOBALS['name'] = trim($_POST['edit_name']);
+  $GLOBALS['slug'] = trim($_POST['edit_slug']);
+  $GLOBALS['id'] = trim($_POST['edit_id']);
+  // 因为slug标识是唯一的==》需要判重
+  // 建立查询语句
+  $check_slug_sql = "SELECT slug FROM categories WHERE  id != '{$GLOBALS['id']}' AND slug = '{$GLOBALS['slug']}';";
+  $check_slug_query = bx_get_db_data($check_slug_sql);
+  if ($check_slug_query) {
+    $GLOBALS['msg'] = '此slug已存在，请重新输入';
+    $GLOBALS['success'] = false;
+    $GLOBALS['edit_flag'] = true;
+    return;
+  }
+  // 判断用户是否没有修改任何内容
+  $get_data_sql = "SELECT * FROM categories WHERE id = '{$GLOBALS['id']}';";
+  $check_data_query = bx_get_db_data($get_data_sql);
+  if(!$check_data_query){
+    $GLOBALS['msg'] = '你要修改的id有误';
+    $GLOBALS['success'] = true;
+    $GLOBALS['edit_flag'] = false;
+    return;
+  }
+  if($check_data_query['name'] === $GLOBALS['name'] && $check_data_query['slug'] === $GLOBALS['slug'] ){
+    $GLOBALS['msg'] = '你没有修改任何内容。';
+    $GLOBALS['success'] = true;
+    $GLOBALS['edit_flag'] = false;
+    return;
+  }
+  // 存入数据库
+  // 建立查询语句
+  $edit_sql = "UPDATE categories SET slug = '{$GLOBALS['slug']}' , `name` = '{$GLOBALS['name']}' WHERE id = {$GLOBALS['id']};";
+  $edit_res = bx_edit_data_to_db($edit_sql);
+  $GLOBALS['success'] = $edit_res > 0;
+  $GLOBALS['msg'] = $edit_res <= 0 ? '修改失败' : '修改成功';
+  $GLOBALS['edit_flag'] = $edit_res <= 0 ? true : false;
+}
+// 编辑数据结束==========================
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  /* 
-  $_POST===>array(2) { ["name"]=> string(10) " 林除夕" ["slug"]=> string(3) "adc" }
-  */
-  add_categories();
-  // exit;
+  isset($_GET['edit']) ? edit_categories() : add_categories();
+}
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+  show_edit_categories();
 }
 ?>
 <?php
 // 获取数据库已有数据
 // 获取数据
-
 // 建立查询语句
 $sql = "SELECT * FROM categories;";
 $res_categories = bx_get_db_data($sql);
@@ -63,13 +141,8 @@ array(6) {
     string(9) "未分类"
   }
 }
-
-
 */
 // 渲染至页面
-
-
-
 // exit;
 ?>
 
@@ -111,21 +184,38 @@ array(6) {
       <?php endif; ?>
       <div class="row">
         <div class="col-md-4">
-          <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="post">
-            <h2>添加新分类目录</h2>
-            <div class="form-group">
-              <label for="name">名称</label>
-              <input id="name" name="name" class="form-control" name="name" type="text" placeholder="分类名称" value="<?php echo (empty($_POST['name']) || $success) ? '' : $_POST['name']; ?>">
-            </div>
-            <div class="form-group">
-              <label for="slug">别名</label>
-              <input id="slug" name="slug" class="form-control" name="slug" type="text" placeholder="slug" value="<?php echo (empty($_POST['slug']) || $success) ? '' : $_POST['slug']; ?>">
-              <p class="help-block">https://zce.me/category/<strong>slug</strong></p>
-            </div>
-            <div class="form-group">
-              <button class="btn btn-primary" type="submit">添加</button>
-            </div>
-          </form>
+          <?php if (isset($edit_flag) && $edit_flag) : ?>
+            <form action="<?php echo $_SERVER["PHP_SELF"]; ?>?edit" method="post">
+              <h2>修改分类目录</h2>
+              <div class="form-group">
+                <label for="name">名称</label>
+                <input id="name" name="edit_name" class="form-control" type="text" placeholder="分类名称" value="<?php echo (empty($name)) ? '' : $name; ?>">
+              </div>
+              <div class="form-group">
+                <label for="slug">别名</label>
+                <input id="slug" name="edit_slug" class="form-control" type="text" placeholder="slug" value="<?php echo (empty($slug)) ? '' : $slug; ?>">
+                <p class="help-block">https://zce.me/category/<strong>slug</strong></p>
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" type="submit" name='edit_id' value="<?php echo (empty($id)) ? '' : $id; ?>">修改</button>
+              </div>
+            <?php else : ?>
+              <form action="<?php echo $_SERVER["PHP_SELF"]; ?>?add" method="post">
+                <h2>添加新分类目录</h2>
+                <div class="form-group">
+                  <label for="name">名称</label>
+                  <input id="name" name="name" class="form-control" type="text" placeholder="分类名称" value="<?php echo (empty($name) || $success) ? '' : $name; ?>">
+                </div>
+                <div class="form-group">
+                  <label for="slug">别名</label>
+                  <input id="slug" name="slug" class="form-control" type="text" placeholder="slug" value="<?php echo (empty($slug) || $success) ? '' : $slug; ?>">
+                  <p class="help-block">https://zce.me/category/<strong>slug</strong></p>
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-primary" type="submit">添加</button>
+                </div>
+              <?php endif; ?>
+            </form>
         </div>
         <div class="col-md-8">
           <div class="page-action">
@@ -148,16 +238,8 @@ array(6) {
                   <td><?php echo $value['name']; ?></td>
                   <td><?php echo $value['slug']; ?></td>
                   <td class="text-center">
-                    <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
-                    <a href="/admin/api/delete-categorie.php?id=<?php echo $value['id']; ?>" class="btn btn-danger btn-xs">删除</a>
-                    <!-- 
-                                        编辑方案：
-                                          --跳转到新页面==》载入已有数据==》用户修改==》存储到数据库==》返回页面
-                                          --本页修改==》将数据加载至左边的新分类目录==》用户修改==》存储到数据库==》刷新页面
-                                        删除方案：
-                                          --跳转页面删除
-                                          --ajax发起删除请求
-                                       -->
+                    <a href="?edit_id=<?php echo $value['id']; ?>" class="btn btn-info btn-xs">编辑</a>
+                    <a href="/admin/api/categorie-delete.php?id=<?php echo $value['id']; ?>" class="btn btn-danger btn-xs">删除</a>
                   </td>
                 </tr>
               <?php endforeach; ?>
@@ -247,7 +329,7 @@ array(6) {
 
       // 用户点击批量删除
       batch_deletion.on('click', function() {
-        var url = '/admin/api/delete-categorie.php?id=' + deleteIdArr.join(',');
+        var url = '/admin/api/categorie-delete.php?id=' + deleteIdArr.join(',');
         $(this).prop('href', url);
       });
     });
