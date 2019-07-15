@@ -21,14 +21,14 @@ $resArr = [
 ];
 // 获取数据
 foreach ($queryArr as $key => $value) {
-  $res = bx_get_db_data($value);
+  $count_data = bx_get_db_data($value)[0];
   // array(1) { ["num"]=> string(1) "4" }
   $resKey = 'res' . substr($key, 5);
   // 如果查询结果不存在就将该值设置为0
-  if (empty($res['num'])) {
+  if (empty($count_data['num'])) {
     $resArr[$resKey] = 0;
   }
-  $resArr[$resKey] = $res['num'];
+  $resArr[$resKey] = $count_data['num'];
 }
 // exit();
 ?>

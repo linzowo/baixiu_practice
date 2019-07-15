@@ -41,17 +41,15 @@ function login()
   $user_email = $_POST['email'];
   $query = "SELECT * FROM users WHERE email = '{$user_email}' LIMIT 1;";
   // 连接数据库
-  $res = bx_get_db_data($query);
-  // 获取用户信息
-  $user = mysqli_fetch_assoc($res);
+  $current_user = bx_get_db_data($query);
   // 判断邮箱是否在数据库中
-  if (!$user) {
+  if (!$current_user) {
     // 用户名不存在
     $GLOBALS['error_msg'] = '邮箱与密码不匹配！';
     return;
   }
   // 判断密码是否匹配数据库信息
-  if ($user['password'] !== $_POST['password']) {
+  if ($current_user['password'] !== $_POST['password']) {
     // 密码不正确
     $GLOBALS['error_msg'] = '邮箱与密码不匹配！';
     return;
@@ -60,7 +58,7 @@ function login()
 
   // 响应
   // 执行到此说明用户输入的信息正确，跳转至主页
-  $_SESSION['user'] = $user;
+  $_SESSION['user'] = $current_user;
   $locationUrl = "Location: " . (empty($_SESSION['source']) ? '/admin/' : $_SESSION['source']);
   header($locationUrl);
 }

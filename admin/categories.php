@@ -1,150 +1,144 @@
 <?php
-// 引入依赖
-require_once '../function.php';
-// 判断用户是否登录
-bx_check_login_status();
-?>
+  require_once '../function.php';// 引入依赖
+
+  bx_check_login_status();// 判断用户是否登录
+  ?>
+  <?php
+
+  // 新增数据开始===========================
+  /**
+   * 处理用户新增分类的函数
+   */
+  function add_categories()
+  {
+    // 校验
+    if (empty($_POST['name']) || empty($_POST['slug'])) {
+      $GLOBALS['msg'] = '请填写完整表单';
+      $GLOBALS['success'] = false;
+      return;
+    }
+    $GLOBALS['name'] = $_POST['name'];
+    $GLOBALS['slug'] = $_POST['slug'];
+    // 因为slug标识是唯一的==》需要判重
+    // 建立查询语句
+    $check_slug_sql = "SELECT slug FROM categories WHERE slug = '{$_POST['slug']}';";
+    $check_slug_query = bx_get_db_data($check_slug_sql);
+    if ($check_slug_query) {
+      $GLOBALS['msg'] = '此slug已存在，请重新输入';
+      $GLOBALS['success'] = false;
+      return;
+    }
+
+    // 持久化
+    // 存入数据库
+    // 建立查询语句
+    $sql = "INSERT INTO categories (`name`,slug) VALUES ('{$_POST['name']}','{$_POST['slug']}');";
+    // var_dump(bx_add_data_to_db($sql));
+    $add = bx_add_data_to_db($sql);
+    $GLOBALS['success'] = $add > 0;
+    $GLOBALS['msg'] = $add <= 0 ? '添加失败' : '添加成功';
+    // 响应
+  }
+  // 新增数据结束===========================
+
+  // 编辑数据开始==========================
+  function show_edit_categories()
+  {
+    // 校验
+    $GLOBALS['edit_flag'] = false;// 编辑状态关闭
+
+    if (empty($_GET['edit_id'])) return;// 没有编辑id==》显示新增页面==》结束
+
+    $editId = (int) $_GET['edit_id'];// 获取id
+
+    if ($editId == 0) return; //不是数字==》结束
+    // 是否存在数据库中
+    $edit_sql = "SELECT * FROM categories WHERE `id`= '{$editId}';";
+    $current_edit_categorie = bx_get_db_data($edit_sql)[0];
+    // array(3) { ["id"]=> string(1) "1" ["slug"]=> string(13) "uncategorized" ["name"]=> string(9) "未分类" }
+    if (!$current_edit_categorie) return;// 数据库中没有==》结束
+
+    // 执行到此说明查询数据存在
+    $GLOBALS['name'] = $current_edit_categorie['name'];
+    $GLOBALS['slug'] = $current_edit_categorie['slug'];
+    $GLOBALS['id'] = $current_edit_categorie['id'];
+    $GLOBALS['edit_flag'] = true;// 编辑状态打开
+  }
+  function edit_categories()
+  {
+    global $msg,$success,$edit_flag,$name,$slug,$id;
+    if (empty($_POST['edit_name']) || empty($_POST['edit_slug']) || empty($_GET['edit_id'])) {
+      $msg = '请填写完整表单';
+      $success = false;
+      $edit_flag = true;
+      return;
+    }
+    $name = trim($_POST['edit_name']);
+    $slug = trim($_POST['edit_slug']);
+    $id = (int)(trim($_GET['edit_id']));
+    // 因为slug标识是唯一的==》需要判重
+    $check_slug_sql = "SELECT slug FROM categories WHERE  id != '{$id}' AND slug = '{$slug}';";
+    $check_slug_query = bx_get_db_data($check_slug_sql);
+    if ($check_slug_query) {
+      $msg = '此slug已存在，请重新输入';
+      $success = false;
+      $edit_flag = true;
+      return;
+    }
+    // 判断用户是否没有修改任何内容
+    $get_data_sql = "SELECT * FROM categories WHERE id = '{$id}';";
+    $current_edit_categorie = bx_get_db_data($get_data_sql)[0];
+    if(!$current_edit_categorie){
+      $msg = '你要修改的id有误';
+      $success = false;
+      $edit_flag = false;
+      return;
+    }
+    if($current_edit_categorie['name'] === $name && $current_edit_categorie['slug'] === $slug ){
+      $msg = '你没有修改任何内容。';
+      $success = true;
+      $edit_flag = false;
+      return;
+    }
+    // 存入数据库
+    $edit_sql = "UPDATE categories SET slug = '{$slug}' , `name` = '{$name}' WHERE id = {$id};";
+    $affected_rows = bx_edit_data_to_db($edit_sql);
+    $success = $affected_rows > 0;
+    $msg = $affected_rows <= 0 ? '修改失败' : '修改成功';
+    $edit_flag = $affected_rows <= 0 ? true : false;
+  }
+  // 编辑数据结束==========================
+?><!-- 引入依赖 声明必要函数 -->
+
 <?php
-
-// 新增数据开始===========================
-/**
- * 处理用户新增分类的函数
- */
-function add_categories()
-{
-  // 校验
-  if (empty($_POST['name']) || empty($_POST['slug'])) {
-    $GLOBALS['msg'] = '请填写完整表单';
-    $GLOBALS['success'] = false;
-    return;
-  }
-  $GLOBALS['name'] = $_POST['name'];
-  $GLOBALS['slug'] = $_POST['slug'];
-  // 因为slug标识是唯一的==》需要判重
-  // 建立查询语句
-  $check_slug_sql = "SELECT slug FROM categories WHERE slug = '{$_POST['slug']}';";
-  $check_slug_query = bx_get_db_data($check_slug_sql);
-  if ($check_slug_query) {
-    $GLOBALS['msg'] = '此slug已存在，请重新输入';
-    $GLOBALS['success'] = false;
-    return;
+  if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    show_edit_categories();
   }
 
-  // 持久化
-  // 存入数据库
-  // 建立查询语句
-  $sql = "INSERT INTO categories (`name`,slug) VALUES ('{$_POST['name']}','{$_POST['slug']}');";
-  // var_dump(bx_add_data_to_db($sql));
-  $add = bx_add_data_to_db($sql);
-  $GLOBALS['success'] = $add > 0;
-  $GLOBALS['msg'] = $add <= 0 ? '添加失败' : '添加成功';
-  // 响应
-}
-// 新增数据结束===========================
+  if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    (!empty($_GET['edit_id'])) ? edit_categories() : add_categories();
+  }
+?><!-- 业务判断 -->
 
-// 编辑数据开始==========================
-function show_edit_categories()
-{
-  // 校验
-  // 判断用户是否选择了编辑数据的标志
-  $GLOBALS['edit_flag'] = false;
-  // 没有传入编辑id==》显示本来的新增页面
-  if (empty($_GET['edit_id'])) return;
-  // 传入了编辑id==》判断id是否合法
-  // 获取要素
-  $editId = (int) $_GET['edit_id'];
-  // 是否是数字
-  if ($editId == 0) return;
-  // 是否存在数据库中
-  // 建立查询语句
-  $edit_sql = "SELECT * FROM categories WHERE `id`= '{$editId}';";
-  $edit_res = bx_get_db_data($edit_sql);
-  // array(3) { ["id"]=> string(1) "1" ["slug"]=> string(13) "uncategorized" ["name"]=> string(9) "未分类" }
-  if (!$edit_res) return;
-
-  // 执行到此说明查询数据存在
-  $GLOBALS['name'] = $edit_res['name'];
-  $GLOBALS['slug'] = $edit_res['slug'];
-  $GLOBALS['id'] = $edit_res['id'];
-  $GLOBALS['edit_flag'] = true;
-  // 响应
-}
-function edit_categories()
-{
-  if (empty($_POST['edit_name']) || empty($_POST['edit_slug'])) {
-    $GLOBALS['msg'] = '请填写完整表单';
-    $GLOBALS['success'] = false;
-    $GLOBALS['edit_flag'] = true;
-    return;
-  }
-  $GLOBALS['name'] = trim($_POST['edit_name']);
-  $GLOBALS['slug'] = trim($_POST['edit_slug']);
-  $GLOBALS['id'] = trim($_POST['edit_id']);
-  // 因为slug标识是唯一的==》需要判重
-  // 建立查询语句
-  $check_slug_sql = "SELECT slug FROM categories WHERE  id != '{$GLOBALS['id']}' AND slug = '{$GLOBALS['slug']}';";
-  $check_slug_query = bx_get_db_data($check_slug_sql);
-  if ($check_slug_query) {
-    $GLOBALS['msg'] = '此slug已存在，请重新输入';
-    $GLOBALS['success'] = false;
-    $GLOBALS['edit_flag'] = true;
-    return;
-  }
-  // 判断用户是否没有修改任何内容
-  $get_data_sql = "SELECT * FROM categories WHERE id = '{$GLOBALS['id']}';";
-  $check_data_query = bx_get_db_data($get_data_sql);
-  if(!$check_data_query){
-    $GLOBALS['msg'] = '你要修改的id有误';
-    $GLOBALS['success'] = true;
-    $GLOBALS['edit_flag'] = false;
-    return;
-  }
-  if($check_data_query['name'] === $GLOBALS['name'] && $check_data_query['slug'] === $GLOBALS['slug'] ){
-    $GLOBALS['msg'] = '你没有修改任何内容。';
-    $GLOBALS['success'] = true;
-    $GLOBALS['edit_flag'] = false;
-    return;
-  }
-  // 存入数据库
-  // 建立查询语句
-  $edit_sql = "UPDATE categories SET slug = '{$GLOBALS['slug']}' , `name` = '{$GLOBALS['name']}' WHERE id = {$GLOBALS['id']};";
-  $edit_res = bx_edit_data_to_db($edit_sql);
-  $GLOBALS['success'] = $edit_res > 0;
-  $GLOBALS['msg'] = $edit_res <= 0 ? '修改失败' : '修改成功';
-  $GLOBALS['edit_flag'] = $edit_res <= 0 ? true : false;
-}
-// 编辑数据结束==========================
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  isset($_GET['edit']) ? edit_categories() : add_categories();
-}
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-  show_edit_categories();
-}
-?>
 <?php
-// 获取数据库已有数据
-// 获取数据
-// 建立查询语句
-$sql = "SELECT * FROM categories;";
-$res_categories = bx_get_db_data($sql);
-/* 
-$res_categories===>
-array(6) {
-  [0]=&gt;
-  array(3) {
-    ["id"]=&gt;
-    string(1) "1"
-    ["slug"]=&gt;
-    string(13) "uncategorized"
-    ["name"]=&gt;
-    string(9) "未分类"
+  // 获取数据库已有数据
+  $sql = "SELECT * FROM categories;";
+  $all_categories = bx_get_db_data($sql);
+  /* 
+  $all_categories===>
+  array(6) {
+    [0]=&gt;
+    array(3) {
+      ["id"]=&gt;
+      string(1) "1"
+      ["slug"]=&gt;
+      string(13) "uncategorized"
+      ["name"]=&gt;
+      string(9) "未分类"
+    }
   }
-}
-*/
-// 渲染至页面
-// exit;
-?>
+  */
+?><!-- 获取渲染页面必须的数据 -->
 
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -170,6 +164,7 @@ array(6) {
       <div class="page-title">
         <h1>分类目录</h1>
       </div>
+      <!-- 错误信息开始 -->
       <!-- 有错误信息时展示 -->
       <?php if (!empty($msg)) :; ?>
         <?php if ($success) :; ?>
@@ -182,10 +177,13 @@ array(6) {
           </div>
         <?php endif; ?>
       <?php endif; ?>
+      <!-- 错误信息结束 -->
+
+      <!-- 新增或修改开始 -->
       <div class="row">
         <div class="col-md-4">
           <?php if (isset($edit_flag) && $edit_flag) : ?>
-            <form action="<?php echo $_SERVER["PHP_SELF"]; ?>?edit" method="post">
+            <form action="<?php echo $_SERVER["PHP_SELF"]; ?>?edit_id=<?php echo (empty($id)) ? '' : $id; ?>" method="post">
               <h2>修改分类目录</h2>
               <div class="form-group">
                 <label for="name">名称</label>
@@ -197,7 +195,7 @@ array(6) {
                 <p class="help-block">https://zce.me/category/<strong>slug</strong></p>
               </div>
               <div class="form-group">
-                <button class="btn btn-primary" type="submit" name='edit_id' value="<?php echo (empty($id)) ? '' : $id; ?>">修改</button>
+                <button class="btn btn-primary" type="submit">修改</button>
               </div>
             <?php else : ?>
               <form action="<?php echo $_SERVER["PHP_SELF"]; ?>?add" method="post">
@@ -217,6 +215,9 @@ array(6) {
               <?php endif; ?>
             </form>
         </div>
+      <!-- 新增或修改结束 -->
+
+      <!-- 数据展示区开始 -->
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
@@ -232,7 +233,7 @@ array(6) {
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($res_categories as $value) :; ?>
+              <?php foreach ($all_categories as $value) :; ?>
                 <tr>
                   <td class="text-center"><input type="checkbox" data-id="<?php echo $value['id']; ?>"></td>
                   <td><?php echo $value['name']; ?></td>
@@ -247,6 +248,8 @@ array(6) {
           </table>
         </div>
       </div>
+      <!-- 数据展示区结束 -->
+
     </div>
   </div>
 
@@ -258,6 +261,8 @@ array(6) {
   <script>
     NProgress.done()
   </script>
+
+  <!-- 批量删除开始 -->
   <script>
     $(function() {
       // 创建一个结果数组
@@ -334,6 +339,7 @@ array(6) {
       });
     });
   </script>
+  <!-- 批量删除结束 -->
 </body>
 
 </html>

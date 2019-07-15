@@ -51,7 +51,8 @@ function query($sql)
 function bx_get_db_data($sql)
 {
     $res = query($sql)[1];
-
+    if(!$res) return false;
+    
     while ($row = mysqli_fetch_assoc($res)) {
         $result[] = $row;
     }
@@ -59,11 +60,7 @@ function bx_get_db_data($sql)
     if (empty($result)) {
         return false;
     }
-    // 如果只有一条数据就返回这一条数据
-    if (count($result) == 1) {
-        return $result[0];
-    }
-    // 如果是多条数据就返回结果数组
+    // 返回结果数组
     return $result;
 }
 /**
