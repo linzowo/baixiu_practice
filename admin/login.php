@@ -16,6 +16,11 @@ session_start();
 // 引入依赖的配置文件
 include_once '../config.php';
 
+// 退出登录
+if($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'logout'){
+  unset($_SESSION['user']);
+}
+
 // 如果已经登录成功就不再显示登录页
 if (!empty($_SESSION['user'])) {
   header('Location: /admin/');
