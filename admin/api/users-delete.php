@@ -2,12 +2,12 @@
 require_once '../../function.php';
 // 防止sql注入
 $idArr = explode(',', $_GET['del_id']);
-if (count($idArr) == 1 && !((int) $idArr[0])) {
+if (count($idArr) == 1 && !((int)$idArr[0])) {
     header('Location: /admin/users.php?del_success=false');
     exit;
 }
 foreach ($idArr as $key => $value) {
-    $idArr[$key] = (int) $_GET['del_id'];
+    $idArr[$key] = (int)$value;
 }
 $idstr = implode(',', $idArr);
 

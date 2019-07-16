@@ -155,7 +155,7 @@ $get_users_data = bx_get_db_data($get_users_data_sql);
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
-            <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
+            <a id="batch_deletion" class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
           </div>
           <table class="table table-striped table-bordered table-hover">
             <thead>
@@ -172,7 +172,7 @@ $get_users_data = bx_get_db_data($get_users_data_sql);
             <tbody>
               <?php foreach ($get_users_data as $value) : ?>
                 <tr>
-                  <td class="text-center"><input type="checkbox"></td>
+                  <td class="text-center"><input type="checkbox" data-id="<?php echo $value['id']; ?>"></td>
                   <td class="text-center"><img class="avatar" src="<?php echo $value['avatar']; ?>"></td>
                   <td><?php echo $value['email']; ?></td>
                   <td><?php echo $value['slug']; ?></td>
@@ -201,6 +201,49 @@ $get_users_data = bx_get_db_data($get_users_data_sql);
   <script>
     NProgress.done()
   </script>
+
+  <!-- 批量删除开始 -->
+  <script>
+  // 获取页面元素
+  var allCheckedObj = $('thead input');
+  var oneCheckedObjArr = $('tbody input');
+  var batchDelBtn = $('#batch_deletion');
+  
+  var deleteIdArr = [];// 结果数组
+
+  // 全选按钮状态改变事件
+  allCheckedObj.on('change',function(){
+    allCheckedObj = this;
+    $.each(oneCheckedObjArr,function(index,ele){
+      $(ele).prop('checked',$(allCheckedObj).prop('checked'));
+      $(allCheckedObj).prop('checked')?deleteIdArr.push($(ele).data('id')):deleteIdArr.splice(deleteIdArr.indexOf($(ele).data('id')),1);
+    });
+    deleteIdArr.length>0?batchDelBtn.show():batchDelBtn.hide();// 显示删除按钮
+  });
+  // 单选按钮钮状态改变事件
+  oneCheckedObjArr.on('change',function(){
+    var id = $(this).data('id');
+    // 添加还是删除id
+    $(this).prop('checked')?deleteIdArr.push(id):deleteIdArr.splice(deleteIdArr.indexOf(id),1);
+    deleteIdArr.length>0?batchDelBtn.show():batchDelBtn.hide();// 显示删除按钮
+    // 是否为全选状态
+    allCheckedObj.prop('checked',true);// 默认全选
+    // 有特殊情况就改变其状态
+    $(this).prop('checked')?$.each(oneCheckedObjArr,function(index,ele){
+      if(!$(ele).prop('checked')){
+        allCheckedObj.prop('checked',false);
+      }
+    }):allCheckedObj.prop('checked',false);
+  });
+
+  // 点击删除按钮
+  batchDelBtn.on('click',function(){
+    var url = '/admin/api/users-delete.php?del_id='+deleteIdArr;
+    $(this).prop('href',url);
+  });
+  
+  </script>
+  <!-- 批量删除结束 -->  
 </body>
 
 </html>

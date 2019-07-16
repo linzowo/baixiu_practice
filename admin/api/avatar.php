@@ -10,10 +10,8 @@ require_once '../../function.php';
         $user_email = $_GET['email'];
         // 建立查询语句
         $query = "SELECT avatar FROM users WHERE email = '{$user_email}' LIMIT 1;";
-        // 调用数据库连接函数
-        $res = bx_get_db_data($query);
         // 获取用户信息
-        $user_avatar = mysqli_fetch_assoc($res);
+        $user_avatar = bx_get_db_data($query)[0];
         if(!$user_avatar){ // 查询结果为空说明没有这个用户
             exit;
         }

@@ -41,7 +41,7 @@ function login()
   $user_email = $_POST['email'];
   $query = "SELECT * FROM users WHERE email = '{$user_email}' LIMIT 1;";
   // 连接数据库
-  $current_user = bx_get_db_data($query);
+  $current_user = bx_get_db_data($query)[0];
   // 判断邮箱是否在数据库中
   if (!$current_user) {
     // 用户名不存在
