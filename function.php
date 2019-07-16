@@ -68,7 +68,9 @@ function bx_get_db_data($sql)
  */
 function bx_add_data_to_db($sql)
 {
-    $conn = query($sql)[0];
+    $query = query($sql);
+    if(!$query) return false;
+    $conn = $query[0];
     // 获取受影响的行数
     $affected_rows = mysqli_affected_rows($conn);
     return $affected_rows;
