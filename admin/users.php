@@ -277,23 +277,19 @@ $get_users_data = bx_get_db_data($get_users_data_sql);
 
     // 全选按钮状态改变事件
     allCheckedObj.on('change', function() {
-      allCheckedObj = this;
-      $.each(oneCheckedObjArr, function(index, ele) {
-        $(ele).prop('checked', $(allCheckedObj).prop('checked'));
-        $(allCheckedObj).prop('checked') ? deleteIdArr.push($(ele).data('id')) : deleteIdArr.splice(deleteIdArr.indexOf($(ele).data('id')), 1);
-      });
-      deleteIdArr.length > 0 ? batchDelBtn.show() : batchDelBtn.hide(); // 显示删除按钮
+      oneCheckedObjArr.prop('checked',$(this).prop('checked')).trigger('change');
     });
     // 单选按钮钮状态改变事件
     oneCheckedObjArr.on('change', function() {
       var id = $(this).data('id');
       // 添加还是删除id
-      $(this).prop('checked') ? deleteIdArr.push(id) : deleteIdArr.splice(deleteIdArr.indexOf(id), 1);
+      $(this).prop('checked') ? deleteIdArr.includes(id) || deleteIdArr.push(id) : deleteIdArr.splice(deleteIdArr.indexOf(id), 1);
       deleteIdArr.length > 0 ? batchDelBtn.show() : batchDelBtn.hide(); // 显示删除按钮
       // 是否为全选状态
       allCheckedObj.prop('checked', true); // 默认全选
       // 有特殊情况就改变其状态
-      $(this).prop('checked') ? $.each(oneCheckedObjArr, function(index, ele) {
+      oneCheckedObjArr = $('tbody input');
+      $(this).prop('checked') ? oneCheckedObjArr.each(function(index, ele) {
         if (!$(ele).prop('checked')) {
           allCheckedObj.prop('checked', false);
         }

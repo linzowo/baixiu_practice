@@ -1,130 +1,132 @@
 <?php
-  require_once '../function.php';// 引入依赖
+require_once '../function.php'; // 引入依赖
 
-  bx_check_login_status();// 判断用户是否登录
-  ?>
-  <?php
+bx_check_login_status(); // 判断用户是否登录
+?>
+<?php
 
-  // 新增数据开始===========================
-  /**
-   * 处理用户新增分类的函数
-   */
-  function add_categories()
-  {
-    // 校验
-    if (empty($_POST['name']) || empty($_POST['slug'])) {
-      $GLOBALS['msg'] = '请填写完整表单';
-      $GLOBALS['success'] = false;
-      return;
-    }
-    $GLOBALS['name'] = $_POST['name'];
-    $GLOBALS['slug'] = $_POST['slug'];
-    // 因为slug标识是唯一的==》需要判重
-    // 建立查询语句
-    $check_slug_sql = "SELECT slug FROM categories WHERE slug = '{$_POST['slug']}';";
-    $check_slug_query = bx_get_db_data($check_slug_sql);
-    if ($check_slug_query) {
-      $GLOBALS['msg'] = '此slug已存在，请重新输入';
-      $GLOBALS['success'] = false;
-      return;
-    }
-
-    // 持久化
-    // 存入数据库
-    // 建立查询语句
-    $sql = "INSERT INTO categories (`name`,slug) VALUES ('{$_POST['name']}','{$_POST['slug']}');";
-    // var_dump(bx_add_data_to_db($sql));
-    $add = bx_add_data_to_db($sql);
-    $GLOBALS['success'] = $add > 0;
-    $GLOBALS['msg'] = $add <= 0 ? '添加失败' : '添加成功';
-    // 响应
+// 新增数据开始===========================
+/**
+ * 处理用户新增分类的函数
+ */
+function add_categories()
+{
+  // 校验
+  if (empty($_POST['name']) || empty($_POST['slug'])) {
+    $GLOBALS['msg'] = '请填写完整表单';
+    $GLOBALS['success'] = false;
+    return;
   }
-  // 新增数据结束===========================
-
-  // 编辑数据开始==========================
-  function show_edit_categories()
-  {
-    // 校验
-    $GLOBALS['edit_flag'] = false;// 编辑状态关闭
-
-    if (empty($_GET['edit_id'])) return;// 没有编辑id==》显示新增页面==》结束
-
-    $editId = (int) $_GET['edit_id'];// 获取id
-
-    if ($editId == 0) return; //不是数字==》结束
-    // 是否存在数据库中
-    $edit_sql = "SELECT * FROM categories WHERE `id`= '{$editId}';";
-    $current_edit_categorie = bx_get_db_data($edit_sql)[0];
-    // array(3) { ["id"]=> string(1) "1" ["slug"]=> string(13) "uncategorized" ["name"]=> string(9) "未分类" }
-    if (!$current_edit_categorie) return;// 数据库中没有==》结束
-
-    // 执行到此说明查询数据存在
-    $GLOBALS['name'] = $current_edit_categorie['name'];
-    $GLOBALS['slug'] = $current_edit_categorie['slug'];
-    $GLOBALS['id'] = $current_edit_categorie['id'];
-    $GLOBALS['edit_flag'] = true;// 编辑状态打开
+  $GLOBALS['name'] = $_POST['name'];
+  $GLOBALS['slug'] = $_POST['slug'];
+  // 因为slug标识是唯一的==》需要判重
+  // 建立查询语句
+  $check_slug_sql = "SELECT slug FROM categories WHERE slug = '{$_POST['slug']}';";
+  $check_slug_query = bx_get_db_data($check_slug_sql);
+  if ($check_slug_query) {
+    $GLOBALS['msg'] = '此slug已存在，请重新输入';
+    $GLOBALS['success'] = false;
+    return;
   }
-  function edit_categories()
-  {
-    global $msg,$success,$edit_flag,$name,$slug,$id;
-    if (empty($_POST['edit_name']) || empty($_POST['edit_slug']) || empty($_GET['edit_id'])) {
-      $msg = '请填写完整表单';
-      $success = false;
-      $edit_flag = true;
-      return;
-    }
-    $name = trim($_POST['edit_name']);
-    $slug = trim($_POST['edit_slug']);
-    $id = (int)(trim($_GET['edit_id']));
-    // 因为slug标识是唯一的==》需要判重
-    $check_slug_sql = "SELECT slug FROM categories WHERE  id != '{$id}' AND slug = '{$slug}';";
-    $check_slug_query = bx_get_db_data($check_slug_sql);
-    if ($check_slug_query) {
-      $msg = '此slug已存在，请重新输入';
-      $success = false;
-      $edit_flag = true;
-      return;
-    }
-    // 判断用户是否没有修改任何内容
-    $get_data_sql = "SELECT * FROM categories WHERE id = '{$id}';";
-    $current_edit_categorie = bx_get_db_data($get_data_sql)[0];
-    if(!$current_edit_categorie){
-      $msg = '你要修改的id有误';
-      $success = false;
-      $edit_flag = false;
-      return;
-    }
-    if($current_edit_categorie['name'] === $name && $current_edit_categorie['slug'] === $slug ){
-      $msg = '你没有修改任何内容。';
-      $success = true;
-      $edit_flag = false;
-      return;
-    }
-    // 存入数据库
-    $edit_sql = "UPDATE categories SET slug = '{$slug}' , `name` = '{$name}' WHERE id = {$id};";
-    $affected_rows = bx_edit_data_to_db($edit_sql);
-    $success = $affected_rows > 0;
-    $msg = $affected_rows <= 0 ? '修改失败' : '修改成功';
-    $edit_flag = $affected_rows <= 0 ? true : false;
+
+  // 持久化
+  // 存入数据库
+  // 建立查询语句
+  $sql = "INSERT INTO categories (`name`,slug) VALUES ('{$_POST['name']}','{$_POST['slug']}');";
+  // var_dump(bx_add_data_to_db($sql));
+  $add = bx_add_data_to_db($sql);
+  $GLOBALS['success'] = $add > 0;
+  $GLOBALS['msg'] = $add <= 0 ? '添加失败' : '添加成功';
+  // 响应
+}
+// 新增数据结束===========================
+
+// 编辑数据开始==========================
+function show_edit_categories()
+{
+  // 校验
+  $GLOBALS['edit_flag'] = false; // 编辑状态关闭
+
+  if (empty($_GET['edit_id'])) return; // 没有编辑id==》显示新增页面==》结束
+
+  $editId = (int) $_GET['edit_id']; // 获取id
+
+  if ($editId == 0) return; //不是数字==》结束
+  // 是否存在数据库中
+  $edit_sql = "SELECT * FROM categories WHERE `id`= '{$editId}';";
+  $current_edit_categorie = bx_get_db_data($edit_sql)[0];
+  // array(3) { ["id"]=> string(1) "1" ["slug"]=> string(13) "uncategorized" ["name"]=> string(9) "未分类" }
+  if (!$current_edit_categorie) return; // 数据库中没有==》结束
+
+  // 执行到此说明查询数据存在
+  $GLOBALS['name'] = $current_edit_categorie['name'];
+  $GLOBALS['slug'] = $current_edit_categorie['slug'];
+  $GLOBALS['id'] = $current_edit_categorie['id'];
+  $GLOBALS['edit_flag'] = true; // 编辑状态打开
+}
+function edit_categories()
+{
+  global $msg, $success, $edit_flag, $name, $slug, $id;
+  if (empty($_POST['edit_name']) || empty($_POST['edit_slug']) || empty($_GET['edit_id'])) {
+    $msg = '请填写完整表单';
+    $success = false;
+    $edit_flag = true;
+    return;
   }
-  // 编辑数据结束==========================
-?><!-- 引入依赖 声明必要函数 -->
+  $name = trim($_POST['edit_name']);
+  $slug = trim($_POST['edit_slug']);
+  $id = (int) (trim($_GET['edit_id']));
+  // 因为slug标识是唯一的==》需要判重
+  $check_slug_sql = "SELECT slug FROM categories WHERE  id != '{$id}' AND slug = '{$slug}';";
+  $check_slug_query = bx_get_db_data($check_slug_sql);
+  if ($check_slug_query) {
+    $msg = '此slug已存在，请重新输入';
+    $success = false;
+    $edit_flag = true;
+    return;
+  }
+  // 判断用户是否没有修改任何内容
+  $get_data_sql = "SELECT * FROM categories WHERE id = '{$id}';";
+  $current_edit_categorie = bx_get_db_data($get_data_sql)[0];
+  if (!$current_edit_categorie) {
+    $msg = '你要修改的id有误';
+    $success = false;
+    $edit_flag = false;
+    return;
+  }
+  if ($current_edit_categorie['name'] === $name && $current_edit_categorie['slug'] === $slug) {
+    $msg = '你没有修改任何内容。';
+    $success = true;
+    $edit_flag = false;
+    return;
+  }
+  // 存入数据库
+  $edit_sql = "UPDATE categories SET slug = '{$slug}' , `name` = '{$name}' WHERE id = {$id};";
+  $affected_rows = bx_edit_data_to_db($edit_sql);
+  $success = $affected_rows > 0;
+  $msg = $affected_rows <= 0 ? '修改失败' : '修改成功';
+  $edit_flag = $affected_rows <= 0 ? true : false;
+}
+// 编辑数据结束==========================
+?>
+<!-- 引入依赖 声明必要函数 -->
 
 <?php
-  if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    show_edit_categories();
-  }
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+  show_edit_categories();
+}
 
-  if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    (!empty($_GET['edit_id'])) ? edit_categories() : add_categories();
-  }
-?><!-- 业务判断 -->
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  (!empty($_GET['edit_id'])) ? edit_categories() : add_categories();
+}
+?>
+<!-- 业务判断 -->
 
 <?php
-  // 获取数据库已有数据
-  $sql = "SELECT * FROM categories;";
-  $all_categories = bx_get_db_data($sql);
-  /* 
+// 获取数据库已有数据
+$sql = "SELECT * FROM categories;";
+$all_categories = bx_get_db_data($sql);
+/* 
   $all_categories===>
   array(6) {
     [0]=&gt;
@@ -138,7 +140,8 @@
     }
   }
   */
-?><!-- 获取渲染页面必须的数据 -->
+?>
+<!-- 获取渲染页面必须的数据 -->
 
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -215,9 +218,9 @@
               <?php endif; ?>
             </form>
         </div>
-      <!-- 新增或修改结束 -->
+        <!-- 新增或修改结束 -->
 
-      <!-- 数据展示区开始 -->
+        <!-- 数据展示区开始 -->
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
@@ -277,59 +280,29 @@
 
       // 为全选框注册点击事件
       checkboxAllObj.on('change', function() {
-        // 所有单选框的状态随全选框状态变化而变化==>全选将所有选择的id加入数组==>全不选将所有id删除
-
-        // 清空数组
-        deleteIdArr = [];
-        var checkboxAllObj = this;
-        checkboxOneArr.each(function(i, item) {
-          if ($(checkboxAllObj).prop('checked')) {
-            deleteIdArr.push($(item).data('id'));
-          }
-          $(item).prop('checked', $(checkboxAllObj).prop('checked'));
-        });
-
-        // 批量删除按钮显示/隐藏
-        deleteIdArr.length == 0 ? batch_deletion.hide() : batch_deletion.show();
-        // console.log(deleteIdArr);
+        checkboxOneArr.prop('checked', $(this).prop('checked')).trigger('change');
       });
 
       // 为每个tbody中的input注册点击事件
       checkboxOneArr.on('change', function() {
-        // 改变当前点击按钮的状态并且将批量删除按钮显示出来
+        var id = $(this).data('id');
+        $(this).prop('checked') ? deleteIdArr.includes(id) || deleteIdArr.push(id) : deleteIdArr.splice(deleteIdArr.indexOf(id), 1);
 
-        // 执行到此说明所有的单选按钮都选择了
-        checkboxAllObj.prop('checked', true);
-
-        // 检查当前元素的选中状态===》删除还是新增id到数组中
-        var dataId = $(this).data('id');
-
-        if ($(this).prop('checked')) { // 当前选项被选中
-          // 将id放入数组
-          deleteIdArr.push(dataId);
-
-          // 获取当前最新的元素信息
-          checkboxOneArr = $('tbody input:checkbox');
-          // 检查所有的元素
-          checkboxOneArr.each(function(i, item) {
-            // 检测是否全选
-            if (!$(item).prop('checked')) {
-              // 存在没有选择的
-              checkboxAllObj.prop('checked', false);
-              // 结束each循环
-              return false;
-            }
-          });
-        } else { // 当前选项被取消选中
-          // 将id删除
-          deleteIdArr.splice(deleteIdArr.indexOf(dataId), 1);
-          // 有选项被取消选中就肯定不是全选===》取消全选框选中状态
-          checkboxAllObj.prop('checked', false);
-        }
+        checkboxAllObj.prop('checked', true); // 默认全选
+        checkboxOneArr = $('tbody input:checkbox'); // 获取最新的列表
+        // 判断是否全选
+        $(this).prop('checked') ? checkboxOneArr.each(function(i, item) {
+          if (!$(item).prop('checked')) {
+            // 存在没有选择的==>取消全选
+            checkboxAllObj.prop('checked', false);
+            // 结束each循环
+            return false;
+          }
+        }) : checkboxAllObj.prop('checked', false);;
 
         // 批量删除按钮显示/隐藏
         deleteIdArr.length == 0 ? batch_deletion.hide() : batch_deletion.show();
-        // console.log(deleteIdArr);
+        console.log(deleteIdArr);
       });
 
       // 用户点击批量删除
