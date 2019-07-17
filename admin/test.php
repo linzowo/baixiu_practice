@@ -203,4 +203,7 @@ array(4) {
 $datestr = "2017-07-01 09:00:00";
 $mytime = strtotime($datestr);
 echo $mytime;
-echo date("Y年-m月-d日\rH:i:s",$mytime);
+echo date("Y年-m月-d日",$mytime);
+echo '<br/>';
+echo date("H:i:s",$mytime);
+echo (string)date("Y年-m月-d日<br>H:i:s",$mytime);
