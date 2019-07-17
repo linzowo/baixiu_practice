@@ -8,24 +8,45 @@ bx_check_login_status();
 <!-- 获取文章数据开始 -->
 <!-- 数据转换函数 -->
 <?php 
+/**
+ * 用户名转换显示
+ * @param int $user_id
+ * @return string nickname 用户昵称
+ */
 function bx_convert_user_name($user_id){
   return bx_get_db_data("SELECT nickname FROM users WHERE id = '{$user_id}';")[0]['nickname'];
 }
 
+/**
+ * 文章名称转换显示
+ * @param int $category_id
+ * @return string name 文章名称
+ */
 function bx_convert_category_name($category_id){
   return bx_get_db_data("SELECT `name` FROM categories WHERE id = '{$category_id}';")[0]['name'];
 }
 
+/**
+ * 创建时间转换显示
+ * @param date $created
+ * @return string created 年-月-日 <br/> 时:分:秒
+ */
 function bx_convert_created($created){
   return date("Y年-m月-d日",strtotime($created)).'<br/>'.date("H:i:s",strtotime($created));
 }
 
-function bx_convert_status(){
-  return array(
+/**
+ * 状态转换显示
+ * @param string $status  英文状态
+ * @return string 用户昵称 中文状态
+ */
+function bx_convert_status($status){
+  $dict = array(
     'drafted' => '草稿',
     'published' => '已发布',
     'trashed' => '回收站'
   );
+  return isset($dict[$status])?$dict[$status]:'未知';
 }
 ?>
 <?php
@@ -106,7 +127,7 @@ $posts = bx_get_db_data($get_posts_sql);
               <td><?php echo bx_convert_user_name($value['user_id']); ?></td>
               <td><?php echo bx_convert_category_name($value['category_id']); ?></td>
               <td class="text-center"><?php echo bx_convert_created($value['created']); ?></td>
-              <td class="text-center"><?php echo bx_convert_status()[$value['status']]; ?></td>
+              <td class="text-center"><?php echo bx_convert_status($value['status']); ?></td>
               <td class="text-center">
                 <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
                 <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
