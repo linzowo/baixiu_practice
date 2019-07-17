@@ -91,3 +91,116 @@ array(3) {
 // var_dump((bool)1);
 // var_dump((bool)2);
 
+/* 
+$get_posts_sql = "SELECT * FROM posts;";
+$posts = bx_get_db_data($get_posts_sql);
+
+array(4) {
+  [0]=&gt;
+  array(11) {
+    ["id"]=&gt;
+    string(1) "1"
+    ["slug"]=&gt;
+    string(11) "hello-world"
+    ["title"]=&gt;
+    string(15) "世界，你好"
+    ["feature"]=&gt;
+    string(29) "/uploads/2017/hello-world.jpg"
+    ["created"]=&gt;
+    string(19) "2017-07-01 08:08:00"
+    ["content"]=&gt;
+    string(102) "欢迎使用阿里百秀。这是您的第一篇文章。编辑或删除它，然后开始写作吧！"
+    ["views"]=&gt;
+    string(3) "222"
+    ["likes"]=&gt;
+    string(3) "111"
+    ["status"]=&gt;
+    string(9) "published"
+    ["user_id"]=&gt;
+    string(1) "1"
+    ["category_id"]=&gt;
+    string(1) "1"
+  }
+  [1]=&gt;
+  array(11) {
+    ["id"]=&gt;
+    string(1) "2"
+    ["slug"]=&gt;
+    string(13) "simple-post-2"
+    ["title"]=&gt;
+    string(21) "第一篇示例文章"
+    ["feature"]=&gt;
+    NULL
+    ["created"]=&gt;
+    string(19) "2017-07-01 09:00:00"
+    ["content"]=&gt;
+    string(51) "欢迎使用阿里百秀。这是一篇示例文章"
+    ["views"]=&gt;
+    string(3) "123"
+    ["likes"]=&gt;
+    string(2) "10"
+    ["status"]=&gt;
+    string(7) "drafted"
+    ["user_id"]=&gt;
+    string(1) "1"
+    ["category_id"]=&gt;
+    string(1) "1"
+  }
+  [2]=&gt;
+  array(11) {
+    ["id"]=&gt;
+    string(1) "3"
+    ["slug"]=&gt;
+    string(13) "simple-post-3"
+    ["title"]=&gt;
+    string(21) "第二篇示例文章"
+    ["feature"]=&gt;
+    NULL
+    ["created"]=&gt;
+    string(19) "2017-07-01 12:00:00"
+    ["content"]=&gt;
+    string(51) "欢迎使用阿里百秀。这是一篇示例文章"
+    ["views"]=&gt;
+    string(2) "20"
+    ["likes"]=&gt;
+    string(3) "120"
+    ["status"]=&gt;
+    string(7) "drafted"
+    ["user_id"]=&gt;
+    string(1) "1"
+    ["category_id"]=&gt;
+    string(1) "2"
+  }
+  [3]=&gt;
+  array(11) {
+    ["id"]=&gt;
+    string(1) "4"
+    ["slug"]=&gt;
+    string(13) "simple-post-4"
+    ["title"]=&gt;
+    string(21) "第三篇示例文章"
+    ["feature"]=&gt;
+    NULL
+    ["created"]=&gt;
+    string(19) "2017-07-01 14:00:00"
+    ["content"]=&gt;
+    string(51) "欢迎使用阿里百秀。这是一篇示例文章"
+    ["views"]=&gt;
+    string(2) "40"
+    ["likes"]=&gt;
+    string(3) "100"
+    ["status"]=&gt;
+    string(7) "drafted"
+    ["user_id"]=&gt;
+    string(1) "1"
+    ["category_id"]=&gt;
+    string(1) "3"
+  }
+}
+
+*/
+
+$datestr = "2017-07-01 09:00:00";
+$mytime = strtotime($datestr);
+echo $mytime;
+echo date("Y年-m月-d日\rH:i:s",$mytime);

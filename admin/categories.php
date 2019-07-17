@@ -302,7 +302,7 @@ $all_categories = bx_get_db_data($sql);
 
         // 批量删除按钮显示/隐藏
         deleteIdArr.length == 0 ? batch_deletion.hide() : batch_deletion.show();
-        console.log(deleteIdArr);
+        // console.log(deleteIdArr);
       });
 
       // 用户点击批量删除
