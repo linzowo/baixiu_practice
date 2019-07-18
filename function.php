@@ -23,6 +23,8 @@ function bx_check_login_status()
 
 /**
  * 连接数据库并建立查询
+ * @param string $sql 查询语句
+ * @return array($conn,$res);
  */
 function query($sql)
 {
@@ -45,8 +47,7 @@ function query($sql)
  * 获取数据库信息
  * @param string $sql==>sql查询语句
  * @return false|array
- * ==>如果返回多条数据==>array[array[key:value],array[key:value],...]
- * ==>返回一条数据==>array[key:value]
+ * array[array[key:value],array[key:value],...]
  */
 function bx_get_db_data($sql)
 {
@@ -65,6 +66,8 @@ function bx_get_db_data($sql)
 }
 /**
  * 新增数据至数据库
+ * @param string $sql 查询语句
+ * @return false|int $affected_rows 受影响的行数
  */
 function bx_add_data_to_db($sql)
 {
@@ -78,6 +81,8 @@ function bx_add_data_to_db($sql)
 
 /**
  * 修改数据传入数据库
+ * @param string $sql 查询语句
+ * @return false|int $affected_rows 受影响的行数
  */
 function bx_edit_data_to_db($sql)
 {
@@ -86,6 +91,8 @@ function bx_edit_data_to_db($sql)
 
 /**
  * 从数据库删除数据
+ * @param string $sql 查询语句
+ * @return false|int $affected_rows 受影响的行数
  */
 function bx_delete_data_to_db($sql)
 {

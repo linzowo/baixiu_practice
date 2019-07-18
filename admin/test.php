@@ -200,10 +200,14 @@ array(4) {
 
 */
 
-$datestr = "2017-07-01 09:00:00";
-$mytime = strtotime($datestr);
-echo $mytime;
-echo date("Y年-m月-d日",$mytime);
-echo '<br/>';
-echo date("H:i:s",$mytime);
-echo (string)date("Y年-m月-d日<br>H:i:s",$mytime);
+// $datestr = "2017-07-01 09:00:00";
+// $mytime = strtotime($datestr);
+// echo $mytime;
+// echo date("Y年-m月-d日",$mytime);
+// echo '<br/>';
+// echo date("H:i:s",$mytime);
+// echo (string)date("Y年-m月-d日<br>H:i:s",$mytime);
+
+var_dump(100.4>=(1004/10));
+var_dump((int)(1004/10));
+var_dump(ceil(1004/10));

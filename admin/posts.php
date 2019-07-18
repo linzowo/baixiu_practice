@@ -7,32 +7,17 @@ bx_check_login_status();
 
 <!-- 获取文章数据开始 -->
 <!-- 数据转换函数 -->
-<?php 
-/**
- * 用户名转换显示
- * @param int $user_id
- * @return string nickname 用户昵称
- */
-function bx_convert_user_name($user_id){
-  return bx_get_db_data("SELECT nickname FROM users WHERE id = '{$user_id}';")[0]['nickname'];
-}
-
-/**
- * 文章名称转换显示
- * @param int $category_id
- * @return string name 文章名称
- */
-function bx_convert_category_name($category_id){
-  return bx_get_db_data("SELECT `name` FROM categories WHERE id = '{$category_id}';")[0]['name'];
-}
-
+<?php
 /**
  * 创建时间转换显示
  * @param date $created
  * @return string created 年-月-日 <br/> 时:分:秒
  */
-function bx_convert_created($created){
-  return date("Y年-m月-d日",strtotime($created)).'<br/>'.date("H:i:s",strtotime($created));
+function bx_convert_created($created)
+{
+  $timestamp = strtotime($created);
+  // return date("Y年-m月-d日",$timestamp).'<br/>'.date("H:i:s",$timestamp);
+  return date('Y年-m月-d日<b\r>H:i:s', $timestamp);
 }
 
 /**
@@ -40,17 +25,51 @@ function bx_convert_created($created){
  * @param string $status  英文状态
  * @return string 用户昵称 中文状态
  */
-function bx_convert_status($status){
+function bx_convert_status($status)
+{
   $dict = array(
     'drafted' => '草稿',
     'published' => '已发布',
     'trashed' => '回收站'
   );
-  return isset($dict[$status])?$dict[$status]:'未知';
+  return isset($dict[$status]) ? $dict[$status] : '未知';
 }
 ?>
 <?php
-$get_posts_sql = "SELECT * FROM posts;";
+// 获取数据库数据总条数===》解决查询范围溢出的问题
+$count_posts_sql = "SELECT COUNT(1) FROM posts;";
+$count_posts = bx_get_db_data($count_posts_sql)[0]['COUNT(1)'];
+
+// 设置分页参数
+$page = empty($_GET['page']) ? 1 : (int) $_GET['page']; // 控制page的下界
+$size = 10;
+$max_page = ($count_posts / $size); // 最大页数
+$page = $page > $max_page ? ceil($max_page) : $page; // 控制page的上界
+$offset = $size * ($page - 1); // 越过多少条数据
+// ==========================================================
+// 设置分页循环需要的参数
+$visible = 5;
+$region = ($visible - 1) / 2;
+$begin = ($page - $region) < 0 ? 1 : ($page - $region);
+$end = ($page + $region) > $max_page ? ceil($max_page) : ($page + $region) > 5? ($page + $region) : 5;
+$previous_page = ($page - 1) > 0 ? $page - 1 : 1;
+$next_page = ($page + 1) > $count_posts ? $count_posts : $page + 1;
+$before = ($page-5) > 2 ? ($page-5) : 1;
+$after = ($page+5+2) > $max_page ? $max_page:($page+5);
+// ========================================================
+// 数据库查询
+$get_posts_sql = "SELECT 
+posts.id,
+posts.title,
+users.nickname as user_name,
+categories.`name` as category_name,
+posts.created,
+posts.`status` 
+FROM posts 
+INNER JOIN categories on posts.category_id = categories.id 
+INNER JOIN users on posts.user_id=users.id 
+ORDER BY posts.created DESC
+LIMIT {$offset},{$size};";
 $posts = bx_get_db_data($get_posts_sql);
 ?>
 <!-- 获取文章数据结束 -->
@@ -99,13 +118,25 @@ $posts = bx_get_db_data($get_posts_sql);
           </select>
           <button class="btn btn-default btn-sm">筛选</button>
         </form>
+
+        <!-- 分页开始 -->
         <ul class="pagination pagination-sm pull-right">
-          <li><a href="#">上一页</a></li>
-          <li><a href="#">1</a></li>
-          <li><a href="#">2</a></li>
-          <li><a href="#">3</a></li>
-          <li><a href="#">下一页</a></li>
+          <li><a href="?page=<?php echo $previous_page; ?>">上一页</a></li>
+          <?php for ($i = $begin; $i <= $end; $i++) : ?>
+            <?php if ($page > 3 && $i === $begin) : ?>
+              <li><a href="?page=<?php echo $before; ?>"><?php echo '...'; ?></a></li>
+            <?php endif; ?>
+
+            <li class="<?php echo $page === $i ? 'active' : ''; ?>"><a href="?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+
+            <?php if ($page < ($max_page - $visible) && $i === $end) : ?>
+              <li><a href="?page=<?php echo $after; ?>"><?php echo '...'; ?></a></li>
+            <?php endif; ?>
+          <?php endfor; ?>
+          <li><a href="?page=<?php echo $next_page; ?>">下一页</a></li>
         </ul>
+        <!-- 分页结束 -->
+
       </div>
       <table class="table table-striped table-bordered table-hover">
         <thead>
@@ -124,8 +155,8 @@ $posts = bx_get_db_data($get_posts_sql);
             <tr>
               <td class="text-center"><input type="checkbox"></td>
               <td><?php echo $value['title']; ?></td>
-              <td><?php echo bx_convert_user_name($value['user_id']); ?></td>
-              <td><?php echo bx_convert_category_name($value['category_id']); ?></td>
+              <td><?php echo $value['user_name']; ?></td>
+              <td><?php echo $value['category_name']; ?></td>
               <td class="text-center"><?php echo bx_convert_created($value['created']); ?></td>
               <td class="text-center"><?php echo bx_convert_status($value['status']); ?></td>
               <td class="text-center">
