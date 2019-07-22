@@ -37,26 +37,68 @@ function bx_convert_status($status)
 ?>
 <?php
 // 获取数据库数据总条数===》解决查询范围溢出的问题
-$count_posts_sql = "SELECT COUNT(1) FROM posts;";
-$count_posts = bx_get_db_data($count_posts_sql)[0]['COUNT(1)'];
+// 获取最大页码
+$size = 10; // 每页展示多少条
 
-// 设置分页参数
-$page = empty($_GET['page']) ? 1 : (int) $_GET['page']; // 控制page的下界
-$size = 10;
-$max_page = ($count_posts / $size); // 最大页数
-$page = $page > $max_page ? ceil($max_page) : $page; // 控制page的上界
-$offset = $size * ($page - 1); // 越过多少条数据
+$count_posts = bx_get_db_data("SELECT 
+count(1) as num 
+FROM posts 
+INNER JOIN categories on posts.category_id = categories.id 
+INNER JOIN users on posts.user_id=users.id;")[0]['num'];
+
+$max_page = (int) ceil($count_posts / $size);  // 最大页数
 // ==========================================================
 // 设置分页循环需要的参数
-$visible = 5;
-$region = ($visible - 1) / 2;
-$begin = ($page - $region) < 0 ? 1 : ($page - $region);
-$end = ($page + $region) > $max_page ? ceil($max_page) : ($page + $region) > 5? ($page + $region) : 5;
-$previous_page = ($page - 1) > 0 ? $page - 1 : 1;
-$next_page = ($page + 1) > $count_posts ? $count_posts : $page + 1;
-$before = ($page-5) > 2 ? ($page-5) : 1;
-$after = ($page+5+2) > $max_page ? $max_page:($page+5);
+$visibles = 5; // 可见页码
+$page = (int) (empty($_GET['page']) ? 1 : $_GET['page']); // 获取页码
+$region = (int) (($visibles - 1) / 2); // 左右区间
+$begin = (int) ($page - $region); // 开始页码
+$end = (int) ($begin + $visibles); // 结束页码
+$offset = ($page - 1) * $size; // 越过多少条数据
+$previous_page = ($page - 1) > 0 ? ($page - 1) : 1; // 上一页
+$next_page = ($page + 1) > $max_page ? $max_page : ($page + 1); // 下一页
+// ==========================================================
+// 前后一批数据
+if (($page-$region) > 1 ) {
+  $before = $page - $visibles;
+  if($before < 1 ){
+    $before = 3;
+  }
+}
+if (($max_page - $page) > $region) {
+  $after = $page + $visibles;
+  if($after > $max_page){
+    $after = $max_page -$region;
+  }
+}
+// ==========================================================
+// 根据页码限制开始和结束范围
+// $begin > 0;
+// $end < $max_page +1
+if ($page < 3) {
+  $begin = 1;
+  $end = $begin + $visibles;
+}
+if ($page > ($max_page - 2)) {
+  $end = $max_page + 1;
+  $begin = $end - $visibles;
+  if ($begin < 0) {
+    $begin = 1;
+  }
+}
 // ========================================================
+// 控制页码不溢出
+// 0 < 页码 < $max_page + 1
+if (($page < 1) || ($_GET['page'] === 0)) {
+  header('Location: /admin/posts.php?page=1');
+}
+if ($page > ($max_page)) {
+  header("Location: /admin/posts.php?page={$max_page}");
+}
+
+// ========================================================
+?>
+<?php
 // 数据库查询
 $get_posts_sql = "SELECT 
 posts.id,
@@ -122,17 +164,17 @@ $posts = bx_get_db_data($get_posts_sql);
         <!-- 分页开始 -->
         <ul class="pagination pagination-sm pull-right">
           <li><a href="?page=<?php echo $previous_page; ?>">上一页</a></li>
-          <?php for ($i = $begin; $i <= $end; $i++) : ?>
-            <?php if ($page > 3 && $i === $begin) : ?>
-              <li><a href="?page=<?php echo $before; ?>"><?php echo '...'; ?></a></li>
-            <?php endif; ?>
+          <?php if (!empty($before)) : ?>
+            <li><a href="?page=<?php echo $before; ?>"><?php echo '...'; ?></a></li>
+          <?php endif; ?>
 
-            <li class="<?php echo $page === $i ? 'active' : ''; ?>"><a href="?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
-
-            <?php if ($page < ($max_page - $visible) && $i === $end) : ?>
-              <li><a href="?page=<?php echo $after; ?>"><?php echo '...'; ?></a></li>
-            <?php endif; ?>
+          <?php for ($i = $begin; $i < $end; $i++) : ?>
+            <li <?php echo $page === $i ? "class='active'" : ''; ?>><a href="?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
           <?php endfor; ?>
+
+          <?php if (!empty($after)) : ?>
+            <li><a href="?page=<?php echo $after; ?>"><?php echo '...'; ?></a></li>
+          <?php endif; ?>
           <li><a href="?page=<?php echo $next_page; ?>">下一页</a></li>
         </ul>
         <!-- 分页结束 -->
