@@ -4,118 +4,162 @@ require_once '../function.php';
 bx_check_login_status();
 ?>
 <!-- 检测用户是否登录结束 -->
+<!-- 分类筛选开始 -->
+<?php 
+  /**
+   * 动态展示有哪些分类信息
+   * 获取用户提交的筛选标志
+   * 根据标志提取数据
+   * 展示数据
+   */
+  // ===============================================
+  // 动态展示分类信息
+  // 获取所有分类
+  $all_categories_arr = bx_get_db_data("SELECT DISTINCT
+  categories.`name`,
+  categories.`slug`
+  FROM posts 
+  INNER JOIN categories on posts.category_id = categories.id 
+  INNER JOIN users on posts.user_id=users.id;");
+  $all_status_arr = bx_get_db_data("SELECT DISTINCT
+  posts.`status` 
+  FROM posts 
+  INNER JOIN categories on posts.category_id = categories.id 
+  INNER JOIN users on posts.user_id=users.id;");
+  // 数据转换
+  /**
+   * 转换status为中文状态
+   * @param string $status 英文状态
+   * @return string 中文状态
+   */
+  function change_status($status){
+    $status_arr = array(
+      'published' => '已发布',   
+      'drafted' => '草稿',   
+      'trashed' => '回收站'
+    );
+    return $status_arr[$status];
+  }
+?>
+<!-- 分类筛选结束 -->
 
 <!-- 获取文章数据开始 -->
+
 <!-- 数据转换函数 -->
 <?php
-/**
- * 创建时间转换显示
- * @param date $created
- * @return string created 年-月-日 <br/> 时:分:秒
- */
-function bx_convert_created($created)
-{
-  $timestamp = strtotime($created);
-  // return date("Y年-m月-d日",$timestamp).'<br/>'.date("H:i:s",$timestamp);
-  return date('Y年-m月-d日<b\r>H:i:s', $timestamp);
-}
+  /**
+   * 创建时间转换显示
+   * @param date $created
+   * @return string created 年-月-日 <br/> 时:分:秒
+   */
+  function bx_convert_created($created)
+  {
+    $timestamp = strtotime($created);
+    // return date("Y年-m月-d日",$timestamp).'<br/>'.date("H:i:s",$timestamp);
+    return date('Y年-m月-d日<b\r>H:i:s', $timestamp);
+  }
 
-/**
- * 状态转换显示
- * @param string $status  英文状态
- * @return string 用户昵称 中文状态
- */
-function bx_convert_status($status)
-{
-  $dict = array(
-    'drafted' => '草稿',
-    'published' => '已发布',
-    'trashed' => '回收站'
-  );
-  return isset($dict[$status]) ? $dict[$status] : '未知';
-}
+  /**
+   * 状态转换显示
+   * @param string $status  英文状态
+   * @return string 用户昵称 中文状态
+   */
+  function bx_convert_status($status)
+  {
+    $dict = array(
+      'drafted' => '草稿',
+      'published' => '已发布',
+      'trashed' => '回收站'
+    );
+    return isset($dict[$status]) ? $dict[$status] : '未知';
+  }
 ?>
+<!-- 分页处理开始 -->
 <?php
-// 获取数据库数据总条数===》解决查询范围溢出的问题
-// 获取最大页码
-$size = 10; // 每页展示多少条
+  // 获取数据库数据总条数===》解决查询范围溢出的问题
+  // 获取最大页码
+  $size = 10; // 每页展示多少条
 
-$count_posts = bx_get_db_data("SELECT 
-count(1) as num 
-FROM posts 
-INNER JOIN categories on posts.category_id = categories.id 
-INNER JOIN users on posts.user_id=users.id;")[0]['num'];
+  $count_posts = bx_get_db_data("SELECT 
+  count(1) as num 
+  FROM posts 
+  INNER JOIN categories on posts.category_id = categories.id 
+  INNER JOIN users on posts.user_id=users.id;")[0]['num'];
 
-$max_page = (int) ceil($count_posts / $size);  // 最大页数
-// ==========================================================
-// 设置分页循环需要的参数
-$visibles = 5; // 可见页码
-$page = (int) (empty($_GET['page']) ? 1 : $_GET['page']); // 获取页码
-$region = (int) (($visibles - 1) / 2); // 左右区间
-$begin = (int) ($page - $region); // 开始页码
-$end = (int) ($begin + $visibles); // 结束页码
-$offset = ($page - 1) * $size; // 越过多少条数据
-$previous_page = ($page - 1) > 0 ? ($page - 1) : 1; // 上一页
-$next_page = ($page + 1) > $max_page ? $max_page : ($page + 1); // 下一页
-// ==========================================================
-// 前后一批数据
-if (($page-$region) > 1 ) {
-  $before = $page - $visibles;
-  if($before < 1 ){
-    $before = 3;
+  $max_page = (int) ceil($count_posts / $size);  // 最大页数
+  // ==========================================================
+  // 设置分页循环需要的参数
+  $visibles = 5; // 可见页码
+  $page = (int) (isset($_GET['page']) ? $_GET['page'] : 1); // 获取页码
+  $region = (int) (($visibles - 1) / 2); // 左右区间
+  $begin = (int) ($page - $region); // 开始页码
+  $end = (int) ($begin + $visibles); // 结束页码
+  $offset = ($page - 1) * $size; // 越过多少条数据
+  $previous_page = ($page - 1) > 0 ? ($page - 1) : 1; // 上一页
+  $next_page = ($page + 1) > $max_page ? $max_page : ($page + 1); // 下一页
+  // ==========================================================
+  // 前后一批数据
+  if (($page-$region) > 1 ) {
+    $before = $page - $visibles;
+    if($before < 1 ){
+      $before = 3;
+    }
   }
-}
-if (($max_page - $page) > $region) {
-  $after = $page + $visibles;
-  if($after > $max_page){
-    $after = $max_page -$region;
+  if (($max_page - $page) > $region) {
+    $after = $page + $visibles;
+    if($after > $max_page){
+      $after = $max_page -$region;
+    }
   }
-}
-// ==========================================================
-// 根据页码限制开始和结束范围
-// $begin > 0;
-// $end < $max_page +1
-if ($page < 3) {
-  $begin = 1;
-  $end = $begin + $visibles;
-}
-if ($page > ($max_page - 2)) {
-  $end = $max_page + 1;
-  $begin = $end - $visibles;
-  if ($begin < 0) {
+  // ==========================================================
+  // 根据页码限制开始和结束范围
+  // $begin > 0;
+  // $end < $max_page +1
+  if ($page < 3) {
     $begin = 1;
+    $end = $begin + $visibles;
   }
-}
-// ========================================================
-// 控制页码不溢出
-// 0 < 页码 < $max_page + 1
-if (($page < 1) || ($_GET['page'] === 0)) {
-  header('Location: /admin/posts.php?page=1');
-}
-if ($page > ($max_page)) {
-  header("Location: /admin/posts.php?page={$max_page}");
-}
+  if ($page > ($max_page - 2)) {
+    $end = $max_page + 1;
+    $begin = $end - $visibles;
+    if ($begin < 0) {
+      $begin = 1;
+    }
+  }
+  // ========================================================
+  // 控制页码不溢出
+  // 0 < 页码 < $max_page + 1
+  if (($page < 1)) {
+    header('Location: /admin/posts.php?page=1');
+  }
+  if ($page > ($max_page)) {
+    header("Location: /admin/posts.php?page={$max_page}");
+  }
 
-// ========================================================
 ?>
+<!-- 分页处理结束 -->
+<!-- 获取全部文章开始 -->
 <?php
-// 数据库查询
-$get_posts_sql = "SELECT 
-posts.id,
-posts.title,
-users.nickname as user_name,
-categories.`name` as category_name,
-posts.created,
-posts.`status` 
-FROM posts 
-INNER JOIN categories on posts.category_id = categories.id 
-INNER JOIN users on posts.user_id=users.id 
-ORDER BY posts.created DESC
-LIMIT {$offset},{$size};";
-$posts = bx_get_db_data($get_posts_sql);
+  // 数据库查询
+  $get_posts_sql = "SELECT 
+  posts.id,
+  posts.title,
+  users.nickname as user_name,
+  categories.`name` as category_name,
+  posts.created,
+  posts.`status` 
+  FROM posts 
+  INNER JOIN categories on posts.category_id = categories.id 
+  INNER JOIN users on posts.user_id=users.id 
+  ORDER BY posts.created DESC
+  LIMIT {$offset},{$size};";
+  $posts = bx_get_db_data($get_posts_sql);
 ?>
+<!-- 获取全部文章结束 -->
+
 <!-- 获取文章数据结束 -->
 
+<?php var_dump($_SERVER['QUERY_STRING']); ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -148,18 +192,24 @@ $posts = bx_get_db_data($get_posts_sql);
       <div class="page-action">
         <!-- show when multiple checked -->
         <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
-        <form class="form-inline">
-          <select name="" class="form-control input-sm">
-            <option value="">所有分类</option>
-            <option value="">未分类</option>
+
+        <!-- 分类筛选开始 -->
+        <form class="form-inline" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="get">
+          <select name="category" class="form-control input-sm">
+            <option value="all">所有分类</option>
+            <?php foreach ($all_categories_arr as $value) : ?>
+              <option value="<?php echo $value['slug']; ?>"><?php echo $value['name']; ?></option>
+            <?php endforeach; ?>
           </select>
-          <select name="" class="form-control input-sm">
-            <option value="">所有状态</option>
-            <option value="">草稿</option>
-            <option value="">已发布</option>
+          <select name="status" class="form-control input-sm">
+            <option value="all">所有状态</option>
+            <?php foreach ($all_status_arr as $value) : ?>
+              <option value="<?php echo $value['status']; ?>"><?php echo change_status($value['status']); ?></option>
+            <?php endforeach; ?>
           </select>
           <button class="btn btn-default btn-sm">筛选</button>
         </form>
+        <!-- 分类筛选结束 -->
 
         <!-- 分页开始 -->
         <ul class="pagination pagination-sm pull-right">
@@ -169,7 +219,7 @@ $posts = bx_get_db_data($get_posts_sql);
           <?php endif; ?>
 
           <?php for ($i = $begin; $i < $end; $i++) : ?>
-            <li <?php echo $page === $i ? "class='active'" : ''; ?>><a href="?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+            <li <?php echo $page === $i ? "class='active'" : ''; ?>><a href="?<?php echo $_SERVER['QUERY_STRING'].'&page='.$i; ?>"><?php echo $i; ?></a></li>
           <?php endfor; ?>
 
           <?php if (!empty($after)) : ?>
