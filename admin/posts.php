@@ -4,14 +4,10 @@ require_once '../function.php';
 bx_check_login_status();
 ?>
 <!-- 检测用户是否登录结束 -->
+
+<!-- =================================================== -->
 <!-- 分类筛选开始 -->
 <?php 
-  /**
-   * 动态展示有哪些分类信息
-   * 获取用户提交的筛选标志
-   * 根据标志提取数据
-   * 展示数据
-   */
   // ===============================================
   // 动态展示分类信息
   // 获取所有分类
@@ -45,33 +41,18 @@ bx_check_login_status();
 <!-- 分类筛选后的分页开始 -->
 <?php 
   // 存储用户选中的分类
-  //默认全选
-  $choose_category = 'all';
-  $choose_status = 'all';
-  // 判断用户是否选取了新的分类
-  if(!empty($_GET['category'])){
-  $choose_category = $_GET['category'];
-  $filter_url = "category={$choose_category}&";
-  }
-  if(!empty($_GET['status'])){
-  $choose_status = $_GET['status'];
-  $filter_url .= "status={$choose_status}&";
-  }
-  // 
-  // 如果用户没有传入任何分类
-  // WHERE categories.`slug` = 'funny' and posts.`status` = 'drafted'
-  $filter_sql = 'posts.id > 0';
-  if($choose_category !== 'all'){
-    $filter_sql = "categories.`slug` = '{$choose_category}'";
-  }
-  if($choose_status !== 'all'){
-    $filter_sql .= " and posts.`status` = '{$choose_status}'";
-  }
+  $choose_category = empty($_GET['category'])?'all':$_GET['category'];
+  $choose_status = empty($_GET['status'])?'all':$_GET['status'];
+  $filter_url = "category={$choose_category}&"."status={$choose_status}&";
+  // 根据用户的选择建立合适的数据库查询语句
+  $filter_sql = ($choose_category !== 'all')?"categories.`slug` = '{$choose_category}'":'posts.id > 0';
+  $filter_sql .= ($choose_status !== 'all')?" and posts.`status` = '{$choose_status}'":'';
 ?>
 <!-- 分类筛选后的分页结束 -->
 
 <!-- 分类筛选结束 -->
 
+<!-- ======================================================== -->
 <!-- 获取文章数据开始 -->
 
 <!-- 数据转换函数 -->
@@ -243,19 +224,19 @@ bx_check_login_status();
 
         <!-- 分页开始 -->
         <ul class="pagination pagination-sm pull-right">
-          <li><a href="?<?php echo empty($filter_url)?'':$filter_url; ?>page=<?php echo $previous_page; ?>">上一页</a></li>
+          <li><a href="?<?php echo $filter_url; ?>page=<?php echo $previous_page; ?>">上一页</a></li>
           <?php if (!empty($before)) : ?>
-            <li><a href="?<?php echo empty($filter_url)?'':$filter_url; ?>page=<?php echo $before; ?>"><?php echo '...'; ?></a></li>
+            <li><a href="?<?php echo $filter_url; ?>page=<?php echo $before; ?>"><?php echo '...'; ?></a></li>
           <?php endif; ?>
 
           <?php for ($i = $begin; $i < $end; $i++) : ?>
-            <li <?php echo $page === $i ? "class='active'" : ''; ?>><a href="?<?php echo empty($filter_url)?'':$filter_url; ?>page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+            <li <?php echo $page === $i ? "class='active'" : ''; ?>><a href="?<?php echo $filter_url; ?>page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
           <?php endfor; ?>
 
           <?php if (!empty($after)) : ?>
-            <li><a href="?<?php echo empty($filter_url)?'':$filter_url; ?>page=<?php echo $after; ?>"><?php echo '...'; ?></a></li>
+            <li><a href="?<?php echo $filter_url; ?>page=<?php echo $after; ?>"><?php echo '...'; ?></a></li>
           <?php endif; ?>
-          <li><a href="?<?php echo empty($filter_url)?'':$filter_url; ?>page=<?php echo $next_page; ?>">下一页</a></li>
+          <li><a href="?<?php echo $filter_url; ?>page=<?php echo $next_page; ?>">下一页</a></li>
         </ul>
         <!-- 分页结束 -->
 
