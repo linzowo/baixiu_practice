@@ -234,10 +234,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // TODO: 上传图片预览
     $('#feature').on('change',function(){
       var file = $(this).prop('files')[0];// 获取一个文件对象
-      // console.dir(file);
-      var url = URL.createObjectURL(file);// 为文件对象创建一个 object url
-      // console.log(url);
-      $(this).siblings('.thumbnail').attr('src',url).fadeIn();// 将用户刚刚上传的文件显示在页面中
+      var reader = new FileReader();
+      $(reader).on('load',function(evt){
+        $('.thumbnail').attr('src',evt.target.result).css({'width':'100px'}).fadeIn();
+      });
+      reader.readAsDataURL(file);
     });
     // TODO: 上传图片状态保持
   </script>
