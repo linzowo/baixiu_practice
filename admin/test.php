@@ -208,6 +208,143 @@ array(4) {
 // echo date("H:i:s",$mytime);
 // echo (string)date("Y年-m月-d日<br>H:i:s",$mytime);
 
-var_dump(100.4>=(1004/10));
-var_dump((int)(1004/10));
-var_dump(ceil(1004/10));
+// var_dump(100.4>=(1004/10));
+// var_dump((int)(1004/10));
+// var_dump(ceil(1004/10));
+
+// $str = '你';
+// echo strlen($str);
+$check_slug = bx_get_db_data("SELECT slug FROM posts WHERE slug = 'lcx';")[0];
+if(!$check_slug){
+  echo 'nihao';
+}
+var_dump($check_slug);
+// $categories_arr = bx_get_db_data("SELECT * FROM categories;");
+// // var_dump(in_array('1',$categories_arr));
+// foreach ($categories_arr as $key => $value) {
+//   if(in_array('1',$value)){
+//     var_dump('hh');
+//     break;
+//   }
+// }
+/* 
+array(7) {
+  [0]=>
+  array(3) {
+    ["id"]=>
+    string(1) "1"
+    ["slug"]=>
+    string(13) "uncategorized"
+    ["name"]=>
+    string(9) "未分类"
+  }
+  [1]=>
+  array(3) {
+    ["id"]=>
+    string(1) "2"
+    ["slug"]=>
+    string(5) "funny"
+    ["name"]=>
+    string(9) "奇趣事"
+  }
+  [2]=>
+  array(3) {
+    ["id"]=>
+    string(1) "3"
+    ["slug"]=>
+    string(6) "living"
+    ["name"]=>
+    string(9) "会生活"
+  }
+  [3]=>
+  array(3) {
+    ["id"]=>
+    string(1) "4"
+    ["slug"]=>
+    string(6) "travel"
+    ["name"]=>
+    string(9) "爱旅行"
+  }
+  [4]=>
+  array(3) {
+    ["id"]=>
+    string(2) "38"
+    ["slug"]=>
+    string(3) "adc"
+    ["name"]=>
+    string(10) " 林除夕"
+  }
+  [5]=>
+  array(3) {
+    ["id"]=>
+    string(2) "39"
+    ["slug"]=>
+    string(4) "adc1"
+    ["name"]=>
+    string(11) " 林除夕1"
+  }
+  [6]=>
+  array(3) {
+    ["id"]=>
+    string(2) "41"
+    ["slug"]=>
+    string(4) "adc3"
+    ["name"]=>
+    string(10) "林除夕3"
+  }
+}
+*/
+// session_start();
+// var_dump($_SESSION['user']['id']);
+
+// $slug = 'slug';
+// $title = 'title';
+// $feature = '123';
+// $created = 'created';
+// $content = 'content';
+// $status = 'status';
+// $user_id = '1';
+// $category_id = '10';
+// $add_sql = sprintf(
+//   "insert into posts values (null, '%s', '%s', '%s', '%s', '%s', 0, 0, '%s', %d, %d)",
+//   $slug,
+//   $title,
+//   $feature,
+//   $created,
+//   $content,
+//   $status,
+//   $user_id,
+//   $category_id
+// );
+// var_dump($add_sql);
+/* 
+insert into posts values (null, 'lcx', '达所发生的法师法师法地方撒放水阀发的发疯', '/static/uploads/1564029931.jpeg', '2019-07-27T00:00', '
+$add_sql = sprintf(
+  "insert into posts values (null, '%s', '%s', '%s', '%s', '%s', 0, 0, '%s', %d, %d)",
+  $slug,
+  $title,
+  $feature,
+  $created,
+  $content,
+  $status,
+  $user_id,
+  $category_id
+);', 0, 0, 'drafted', 1, 38)
+string(399) "insert into posts values (null, 'lcx', '达所发生的法师法师法地方撒放水阀发的发疯', '/static/uploads/1564029931.jpeg', '2019-07-27T00:00', '
+$add_sql = sprintf(
+  "insert into posts values (null, '%s', '%s', '%s', '%s', '%s', 0, 0, '%s', %d, %d)",
+  $slug,
+  $title,
+  $feature,
+  $created,
+  $content,
+  $status,
+  $user_id,
+  $category_id
+);', 0, 0, 'drafted', 1, 38)"
+
+
+
+
+  
+*/
