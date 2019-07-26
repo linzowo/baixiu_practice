@@ -77,7 +77,7 @@ function post_add()
   }
   // 图片==类型==大小
   var_dump($_FILES);
-  if (empty($_FILES['feature']['error'])) {
+  if ((!empty($_FILES['feature'])) && empty($_FILES['feature']['error'])) {
     $allowed_img = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!in_array($_FILES['feature']['type'], $allowed_img)) {
       $msg = '图片格式不支持。';
@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="utf-8">
   <title>Add new post &laquo; Admin</title>
   <link rel="stylesheet" href="/static/assets/vendors/bootstrap/css/bootstrap.css">
-  <link rel="stylesheet" href="/static/assets/vendors/bootstrap/css/bootstrap-datepicker.min.css">
+  <link rel="stylesheet" href="/static/assets/vendors/bootstrap/css/bootstrap-datetimepicker.min.css">
   <link rel="stylesheet" href="/static/assets/vendors/font-awesome/css/font-awesome.css">
   <link rel="stylesheet" href="/static/assets/vendors/nprogress/nprogress.css">
   <link rel="stylesheet" href="/static/assets/css/admin.css">
@@ -197,9 +197,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
           <div class="form-group">
             <label for="created">发布时间</label>
-            <input type="text" class="form-control" id="created" name="created">
-            <!-- <input id="created" class="form-control" name="created" type="datetime-local" <?php //echo empty($created) ? '' : " value='{$created}'"; 
-                                                                                                ?>> -->
+            <!-- <input type="text" class="form-control" id="created" name="created"> -->
+            <input id="created" class="form-control" name="created" type="datetime" <?php echo empty($created) ? '' : " value='{$created}'";?>>
           </div>
           <div class="form-group">
             <label for="status">状态</label>
@@ -221,8 +220,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
-  <script src="/static/assets/vendors/bootstrap/js/bootstrap-datepicker.min.js"></script>
-  <script src="/static/assets/vendors/bootstrap/js/bootstrap-datepicker.zh-CN.min.js"></script>
+  <script src="/static/assets/vendors/bootstrap/js/bootstrap-datetimepicker.min.js"></script>
+  <script src="/static/assets/vendors/bootstrap/js/bootstrap-datetimepicker.zh-CN.js"></script>
   <script src="/static/assets/vendors/simplemde/simplemde.min.js"></script> <!-- 引入富文本插件库 -->
   <script src="/static/assets/vendors/upload/upload.js"></script><!-- 引入图片上传预览库 -->
   <script src="/static/assets/vendors/moment/moment.js"></script>
@@ -239,13 +238,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     })
     // 初始化时间
-    // $('#created').val(moment().format('YYYY-MM-DDTHH:mm'));
+    $('#created').val(moment().format('YYYY-MM-DD HH:mm'));
   </script>
   <script type="text/javascript">
     $(function() {
-      $('#created').datepicker({
-        language:"zh-CN",
-        autoclose:true,
+      $('#created').datetimepicker({
+        autoclose: true,
+        format: 'yyyy-mm-dd hh:ii'
       });
     });
   </script>
