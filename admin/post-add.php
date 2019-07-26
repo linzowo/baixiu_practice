@@ -138,6 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="utf-8">
   <title>Add new post &laquo; Admin</title>
   <link rel="stylesheet" href="/static/assets/vendors/bootstrap/css/bootstrap.css">
+  <link rel="stylesheet" href="/static/assets/vendors/bootstrap/css/bootstrap-datepicker.min.css">
   <link rel="stylesheet" href="/static/assets/vendors/font-awesome/css/font-awesome.css">
   <link rel="stylesheet" href="/static/assets/vendors/nprogress/nprogress.css">
   <link rel="stylesheet" href="/static/assets/css/admin.css">
@@ -196,7 +197,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
           <div class="form-group">
             <label for="created">发布时间</label>
-            <input id="created" class="form-control" name="created" type="datetime-local" <?php echo empty($created) ? '' : " value='{$created}'"; ?>>
+            <input type="text" class="form-control" id="created" name="created">
+            <!-- <input id="created" class="form-control" name="created" type="datetime-local" <?php //echo empty($created) ? '' : " value='{$created}'"; 
+                                                                                                ?>> -->
           </div>
           <div class="form-group">
             <label for="status">状态</label>
@@ -218,18 +221,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script src="/static/assets/vendors/bootstrap/js/bootstrap-datepicker.min.js"></script>
+  <script src="/static/assets/vendors/bootstrap/js/bootstrap-datepicker.zh-CN.min.js"></script>
   <script src="/static/assets/vendors/simplemde/simplemde.min.js"></script> <!-- 引入富文本插件库 -->
   <script src="/static/assets/vendors/upload/upload.js"></script><!-- 引入图片上传预览库 -->
+  <script src="/static/assets/vendors/moment/moment.js"></script>
   <script>
     // 创建一个富文本对象
     var simplemde = new SimpleMDE({
-      element: $('#content')[0]
+      autoDownloadFontAwesome: false, // 阻止其自动下载字体文件
+      element: $('#content')[0],
     });
+    // 图片预览功能
     var dragImgUpload = new DragImgUpload(".img-thumbnail", {
       callback: function(fileInput) {
-        $(fileInput).appendTo($('.img-thumbnail'));// 将生成的input对象添加到表单中
+        $(fileInput).appendTo($('.img-thumbnail')); // 将生成的input对象添加到表单中
       }
     })
+    // 初始化时间
+    // $('#created').val(moment().format('YYYY-MM-DDTHH:mm'));
+  </script>
+  <script type="text/javascript">
+    $(function() {
+      $('#created').datepicker({
+        language:"zh-CN",
+        autoclose:true,
+      });
+    });
   </script>
   <script>
     NProgress.done()
