@@ -56,9 +56,9 @@ DragImgUpload.prototype = {
         //拖拉图片到浏览器，可以实现预览功能
         var img = window.URL.createObjectURL(fileList[0]);
         var filename = fileList[0].name; //图片名称
-        var filesize = Math.floor((fileList[0].size)/1024);
-        if(filesize>500){
-            alert("上传大小不能超过500K.");
+        var filesize = Math.floor(((fileList[0].size)/1024)/1024);
+        if(filesize>10){
+            alert("上传大小不能超过10M.");
             return false;
         }
 
@@ -92,22 +92,24 @@ DragImgUpload.prototype = {
         this.me.find("img").attr("src",img);
         this.me.find("img").attr("title",filename);
         if(this.callback){
-            this.callback(files);
+            this.callback(fileInput);
         }
     },
     createImageUploadDialog:function () {
         var fileInput = this.fileInput;
         if (!fileInput) {
             //创建临时input元素
-            fileInput = document.createElement('input');
-            //设置input type为文件类型
-            fileInput.type = 'file';
-            //设置文件name
-            fileInput.name = 'ime-images';
-            //允许上传多个文件
-            fileInput.multiple = true;
-            fileInput.onchange  = this.onChangeUploadFile.bind(this);
-            this.fileInput = fileInput;
+            fileInput = $("<input >");
+            fileInput.prop({
+                'id':"feature",
+                'type':'file',// 设置类型
+                'name':'feature',// 设置name
+                'accept':"image/*",// 限制文件类型为图片
+                'multiple' : true,// 运行上传多个文件
+                'style':"display:none"
+            });
+            fileInput[0].onchange  = this.onChangeUploadFile.bind(this);
+            this.fileInput = fileInput[0];
         }
         //触发点击input点击事件，弹出选择文件对话框
         fileInput.click();

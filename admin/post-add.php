@@ -76,6 +76,7 @@ function post_add()
     return;
   }
   // 图片==类型==大小
+  var_dump($_FILES);
   if (empty($_FILES['feature']['error'])) {
     $allowed_img = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!in_array($_FILES['feature']['type'], $allowed_img)) {
@@ -224,25 +225,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     var simplemde = new SimpleMDE({
       element: $('#content')[0]
     });
-    // TODO: 上传图片预览
-    // $('#feature').on('change', function() {
-    //   var file = $(this).prop('files')[0]; // 获取一个文件对象
-    //   var reader = new FileReader();
-    //   $(reader).on('load', function(evt) {
-    //     $('.thumbnail').attr('src', evt.target.result).css({
-    //       'width': '100px'
-    //     }).fadeIn();
-    //   });
-    //   reader.readAsDataURL(file);
-    // });
-    // TODO: 上传图片状态保持
-  </script>
-  <script type="text/javascript">
     var dragImgUpload = new DragImgUpload(".img-thumbnail", {
-      callback: function(files) {
-        //回调函数，可以传递给后台等等
-        var file = files[0];
-        console.log(file.name);
+      callback: function(fileInput) {
+        $(fileInput).appendTo($('.img-thumbnail'));// 将生成的input对象添加到表单中
       }
     })
   </script>
