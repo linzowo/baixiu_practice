@@ -40,8 +40,7 @@ function query($sql)
     if (!$res) {
         return false;
     }
-    return array($conn,$res);
-
+    return array($conn, $res);
 }
 /**
  * 获取数据库信息
@@ -52,8 +51,8 @@ function query($sql)
 function bx_get_db_data($sql)
 {
     $res = query($sql)[1];
-    if(!$res) return false;
-    
+    if (!$res) return false;
+
     while ($row = mysqli_fetch_assoc($res)) {
         $result[] = $row;
     }
@@ -72,7 +71,7 @@ function bx_get_db_data($sql)
 function bx_add_data_to_db($sql)
 {
     $query = query($sql);
-    if(!$query) return false;
+    if (!$query) return false;
     $conn = $query[0];
     // 获取受影响的行数
     $affected_rows = mysqli_affected_rows($conn);
@@ -97,4 +96,80 @@ function bx_edit_data_to_db($sql)
 function bx_delete_data_to_db($sql)
 {
     return bx_add_data_to_db($sql);
+}
+
+/**
+ * 根据现有数据输出分页按钮
+ * @param int $max_page 页面的最大页码数
+ * @param string $format 连接模版，%d替换为具体数字
+ * @param int $visibles 展示多少个分页按钮，默认展示5个
+ * @example 
+ * <?php bx_get_paging(10,'/list.php?page=%d',5); ?>
+ */
+function bx_get_paging($max_page,$format,$visibles=5)
+{ 
+    // 获取数据库数据总条数===》解决查询范围溢出的问题
+    // 获取最大页码
+    $max_page = (int) $max_page;  // 最大页数
+    // ==========================================================
+    // 设置分页循环需要的参数
+    $visibles = 5; // 可见页码
+    $page = (int) (isset($_GET['page']) ? $_GET['page'] : 1); // 获取页码
+    $region = (int) (($visibles - 1) / 2); // 左右区间
+    $begin = (int) ($page - $region); // 开始页码
+    $end = (int) ($begin + $visibles); // 结束页码
+    $previous_page = ($page - 1) > 0 ? ($page - 1) : 1; // 上一页
+    $next_page = ($page + 1) > $max_page ? $max_page : ($page + 1); // 下一页
+    // ==========================================================
+    // 前后一批数据
+    if (($page - $region) > 1) {
+        $before = $page - $visibles;
+        if ($before < 1) {
+            $before = 3;
+        }
+    }
+    if (($max_page - $page) > $region) {
+        $after = $page + $visibles;
+        if ($after > $max_page) {
+            $after = $max_page - $region;
+        }
+    }
+    // ==========================================================
+    // 根据页码限制开始和结束范围
+    // $begin > 0;
+    // $end < $max_page +1
+    if ($page < 3) {
+        $begin = 1;
+        $end = $begin + $visibles;
+    }
+    if ($page > ($max_page - 2)) {
+        $end = $max_page + 1;
+        $begin = $end - $visibles;
+        if ($begin < 0) {
+            $begin = 1;
+        }
+    }
+    // 输出页面按钮
+    // 上一页
+    if($page > 1){
+        printf('<li><a href="%s">上一页</a></li>',sprintf($format,$previous_page));
+    }
+    // 省略号
+    if (($page > 3)&&($max_page > 5)){
+        echo '<li><span>...</span></li>';
+    }
+    // 分页页码
+    for ($i = $begin; $i < $end; $i++) {
+        $activeClass = $page === $i ? " class='active'" : '';
+        printf('<li%s><a href="%s">%s</a></li>',$activeClass,sprintf($format,$i),$i);
+    }
+    // 省略号 
+    if(($page < ($max_page - $region))&&($max_page > 5)){
+        echo '<li><span>...</span></li>';
+    }
+    // 下一页
+    if($page < $max_page){
+        printf('<li><a href="%s">下一页</a></li>',sprintf($format,$next_page));
+    }
+    
 }

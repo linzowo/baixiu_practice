@@ -85,12 +85,12 @@
     ?>
   <!-- 数据转换函数结束 -->
 
-  <!-- 分页处理开始 -->
+  <!-- 获取全部文章开始 -->
     <?php
-      // 获取数据库数据总条数===》解决查询范围溢出的问题
-      // 获取最大页码
+      $page = (int) (isset($_GET['page']) ? $_GET['page'] : 1); // 获取页码
       $size = 10; // 每页展示多少条
-
+      $offset = ($page - 1) * $size; // 越过多少条数据
+      // 获取最大页码数
       $count_posts = bx_get_db_data("SELECT 
       count(1) as num 
       FROM posts 
@@ -98,62 +98,18 @@
       INNER JOIN users on posts.user_id=users.id
       WHERE {$filter_sql}
       ;")[0]['num'];
-
       $max_page = (int) ceil($count_posts / $size);  // 最大页数
-      // ==========================================================
-      // 设置分页循环需要的参数
-      $visibles = 5; // 可见页码
-      $page = (int) (isset($_GET['page']) ? $_GET['page'] : 1); // 获取页码
-      $region = (int) (($visibles - 1) / 2); // 左右区间
-      $begin = (int) ($page - $region); // 开始页码
-      $end = (int) ($begin + $visibles); // 结束页码
-      $offset = ($page - 1) * $size; // 越过多少条数据
-      $previous_page = ($page - 1) > 0 ? ($page - 1) : 1; // 上一页
-      $next_page = ($page + 1) > $max_page ? $max_page : ($page + 1); // 下一页
-      // ==========================================================
-      // 前后一批数据
-      if (($page-$region) > 1 ) {
-        $before = $page - $visibles;
-        if($before < 1 ){
-          $before = 3;
-        }
-      }
-      if (($max_page - $page) > $region) {
-        $after = $page + $visibles;
-        if($after > $max_page){
-          $after = $max_page -$region;
-        }
-      }
-      // ==========================================================
-      // 根据页码限制开始和结束范围
-      // $begin > 0;
-      // $end < $max_page +1
-      if ($page < 3) {
-        $begin = 1;
-        $end = $begin + $visibles;
-      }
-      if ($page > ($max_page - 2)) {
-        $end = $max_page + 1;
-        $begin = $end - $visibles;
-        if ($begin < 0) {
-          $begin = 1;
-        }
-      }
+
       // ========================================================
       // 控制页码不溢出
       // 0 < 页码 < $max_page + 1
-      if (($page < 1)) {
+      if (($page < 0)) {
         header('Location: /admin/posts.php?page=1'.$filter_search);
       }
       if ($page > ($max_page)) {
         header("Location: /admin/posts.php?page={$max_page}".$filter_search);
       }
 
-    ?>
-  <!-- 分页处理结束 -->
-
-  <!-- 获取全部文章开始 -->
-    <?php
       // 数据库查询
       $get_posts_sql = "SELECT 
       posts.id,
@@ -226,19 +182,7 @@
 
         <!-- 分页开始 -->
         <ul class="pagination pagination-sm pull-right">
-          <li><a href="?page=<?php echo $previous_page.$filter_search; ?>">上一页</a></li>
-          <?php if (!empty($before)) : ?>
-            <li><a href="?page=<?php echo $before.$filter_search; ?>"><?php echo '...'; ?></a></li>
-          <?php endif; ?>
-
-          <?php for ($i = $begin; $i < $end; $i++) : ?>
-            <li <?php echo $page === $i ? "class='active'" : ''; ?>><a href="?page=<?php echo $i.$filter_search; ?>"><?php echo $i; ?></a></li>
-          <?php endfor; ?>
-
-          <?php if (!empty($after)) : ?>
-            <li><a href="?page=<?php echo $after.$filter_search; ?>"><?php echo '...'; ?></a></li>
-          <?php endif; ?>
-          <li><a href="?page=<?php echo $next_page.$filter_search; ?>">下一页</a></li>
+          <?php bx_get_paging($max_page,"/admin/posts.php?page=%d{$filter_search}") ?>
         </ul>
         <!-- 分页结束 -->
 
