@@ -2,6 +2,12 @@
 require_once '../function.php';
 bx_check_login_status();
 ?>
+<?php 
+// TODO: 分页
+// TODO: 批准
+// TODO: 删除
+// // TODO: 批量删除
+?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -53,44 +59,7 @@ bx_check_login_status();
             <th class="text-center" width="100">操作</th>
           </tr>
         </thead>
-        <tbody>
-          <tr class="danger">
-            <td class="text-center"><input type="checkbox"></td>
-            <td>大大</td>
-            <td>楼主好人，顶一个</td>
-            <td>《Hello world》</td>
-            <td>2016/10/07</td>
-            <td>未批准</td>
-            <td class="text-center">
-              <a href="post-add.html" class="btn btn-info btn-xs">批准</a>
-              <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-            </td>
-          </tr>
-          <tr>
-            <td class="text-center"><input type="checkbox"></td>
-            <td>大大</td>
-            <td>楼主好人，顶一个</td>
-            <td>《Hello world》</td>
-            <td>2016/10/07</td>
-            <td>已批准</td>
-            <td class="text-center">
-              <a href="post-add.html" class="btn btn-warning btn-xs">驳回</a>
-              <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-            </td>
-          </tr>
-          <tr>
-            <td class="text-center"><input type="checkbox"></td>
-            <td>大大</td>
-            <td>楼主好人，顶一个</td>
-            <td>《Hello world》</td>
-            <td>2016/10/07</td>
-            <td>已批准</td>
-            <td class="text-center">
-              <a href="post-add.html" class="btn btn-warning btn-xs">驳回</a>
-              <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-            </td>
-          </tr>
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
   </div>
@@ -100,6 +69,32 @@ bx_check_login_status();
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script src="/static/assets/vendors/jsrender/jsrender.js"></script>
+  <script id="comments_tmpl" type="text/x-jsrender">
+    {{for comments}}
+      <tr class="{{:status === 'rejected'?'danger':status === 'held'?'warning': ''}}">
+        <td class="text-center"><input type="checkbox"></td>
+        <td>{{:author}}</td>
+        <td>{{:content}}</td>
+        <td>《Hello world》</td>
+        <td>{{:created}}</td>
+        <td>{{:status}}</td>
+        <td class="text-center">
+          <a href="post-add.html" class="btn btn-info btn-xs">批准</a>
+          <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+        </td>
+      </tr>
+    {{/for}}
+  </script>
+  <script>
+    // 通过ajax获取数据
+    $.get('/admin/api/comments.php',{},function(res){
+      // console.log(res);
+      var html = $('#comments_tmpl').render({ comments:res });
+      $('tbody').html(html);
+    });
+    // <!-- TODO: 处理数据转换问题 -->
+  </script>
   <script>NProgress.done()</script>
 </body>
 </html>
