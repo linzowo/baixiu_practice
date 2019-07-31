@@ -3,7 +3,6 @@ require_once '../function.php';
 bx_check_login_status();
 ?>
 <?php
-// TODO: 分页
 // TODO: 批准
 // TODO: 删除
 // // TODO: 批量删除
@@ -232,7 +231,7 @@ bx_check_login_status();
   <script src="/static/assets/vendors/twbs-pagination/jquery.twbsPagination.js"></script>
   <script id="comments_tmpl" type="text/x-jsrender">
     {{for comments}}
-    <tr class="{{:status === 'rejected'?'danger':status === 'held'?'warning': ''}}">
+    <tr class="{{:status === 'rejected'?'danger':status === 'held'?'warning': ''}}" data-id="{{:id}}">
       <td class="text-center"><input type="checkbox"></td>
       <td class="text-center" width="100">{{:author}}</td>
       <td>{{:content}}</td>
@@ -244,7 +243,7 @@ bx_check_login_status();
         <a href="post-add.html" class="btn btn-info btn-xs">批准</a>
         <a class="btn btn-warning btn-xs btn-edit" href="javascript:;" data-status="rejected">拒绝</a>
         {{else}}
-          <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+          <a href="javascript:;" class="btn btn-danger btn-xs btn-delete">删除</a>
           {{/if}}
       </td>
     </tr>
@@ -262,21 +261,30 @@ bx_check_login_status();
         NProgress.done()
         // 关闭loading图像
         $('.lds-css').fadeOut();
-      })
+    })
+
+    // 初始化数据
+    var size = 30; // 页大小
+    var current_page = 1; // 当前页码
     /**
      * 获取分页数据并渲染
      * @param int page 查询第几页的数据
      */
-    function loadPageDate(page) {
+    function loadPageDate() {
       // 获取元素
       var tbody = $('tbody');
       // 通过ajax获取数据
       tbody.fadeOut();
-      $.get('/admin/api/comments.php', {
-        page: page
-      }, function(res) {
+      $.get('/admin/api/comments.php', { p: current_page , s : size }, function(res) {
+        if(current_page > res['total_page']){
+          current_page = res['total_page'];
+          loadPageDate();
+          return;
+        }
+        $('.pagination').twbsPagination('destroy');// 销毁初始化的分页按钮
         // 使用jquery分页库生成分页数据
         $('.pagination').twbsPagination({
+          startPage: current_page,
           totalPages: res['total_page'],
           visiblePages: 5,
           first: '&laquo;',
@@ -285,7 +293,8 @@ bx_check_login_status();
           next: '&gt;',
           initiateStartPageClick: false,
           onPageClick: function(e, page) {
-            loadPageDate(page);
+            current_page = page;
+            loadPageDate();
           }
         });
         // 获取当前页面应该展示的数据并渲染
@@ -296,8 +305,26 @@ bx_check_login_status();
         tbody.fadeIn();
       });
     }
+
     // 初始化页面
-    loadPageDate(1);
+    loadPageDate();
+
+    // TODO: 添加删除功能
+    // =====================================
+    // 注册点击事件==>因为删除按钮是动态加载的==>需要通过父元素委托注册点击事件
+    $('tbody').on('click', '.btn-delete', function() {
+      // 获取要删除的id
+      var id = $(this).parent().parent().data('id');
+      // 发起一个ajax请求删除数据
+      $.get('/admin/api/comment-delete.php', { id : id }, function(res) {
+        // console.log(res);
+        if (!res) return; // 如果删除失败什么都不做
+        // 重新获取当前页数据
+        loadPageDate();
+      });
+      // 根据返回的情况展示页面数据
+      // 实时更新最大页码数
+    });
   </script>
   <script>
     NProgress.done()

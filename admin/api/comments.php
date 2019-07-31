@@ -2,8 +2,8 @@
 // 获取用户评论信息
 // 引入封装的函数
 require_once '../../function.php';
-$page = empty($_GET['page'])?1:$_GET['page'];
-$size = 30;
+$page = empty($_GET['p'])?1:$_GET['p'];
+$size = empty($_GET['s'])?1:$_GET['s'];;
 $offset = ($page - 1)*$size;
 // 获取数据库数据
 $comments = bx_get_db_data("SELECT 
