@@ -39,23 +39,17 @@ bx_check_login_status();
           <button class="btn btn-warning btn-sm">批量拒绝</button>
           <button class="btn btn-danger btn-sm">批量删除</button>
         </div>
-        <ul class="pagination pagination-sm pull-right">
-          <li><a href="#">上一页</a></li>
-          <li><a href="#">1</a></li>
-          <li><a href="#">2</a></li>
-          <li><a href="#">3</a></li>
-          <li><a href="#">下一页</a></li>
-        </ul>
+        <ul class="pagination pagination-sm pull-right"></ul>
       </div>
       <table class="table table-striped table-bordered table-hover">
         <thead>
           <tr>
             <th class="text-center" width="40"><input type="checkbox"></th>
-            <th>作者</th>
+            <th class="text-center">作者</th>
             <th>评论</th>
             <th>评论在</th>
             <th>提交于</th>
-            <th>状态</th>
+            <th class="text-center">状态</th>
             <th class="text-center" width="100">操作</th>
           </tr>
         </thead>
@@ -70,30 +64,55 @@ bx_check_login_status();
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
   <script src="/static/assets/vendors/jsrender/jsrender.js"></script>
+  <script src="/static/assets/vendors/twbs-pagination/jquery.twbsPagination.js"></script>
   <script id="comments_tmpl" type="text/x-jsrender">
     {{for comments}}
       <tr class="{{:status === 'rejected'?'danger':status === 'held'?'warning': ''}}">
         <td class="text-center"><input type="checkbox"></td>
-        <td>{{:author}}</td>
+        <td class="text-center" width = "100">{{:author}}</td>
         <td>{{:content}}</td>
-        <td>《Hello world》</td>
-        <td>{{:created}}</td>
-        <td>{{:status}}</td>
-        <td class="text-center">
-          <a href="post-add.html" class="btn btn-info btn-xs">批准</a>
-          <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+        <td style=" white-space:nowrap" >《{{:post_title}}》</td>
+        <td width = "100">{{:created}}</td>
+        <td class="text-center" width = "100">{{:status === 'rejected'?'拒绝':status === 'held'?'待审核': '通过'}}</td>
+        <td class="text-center" width = '150'>
+          {{if status === 'held'}}
+            <a href="post-add.html" class="btn btn-info btn-xs">批准</a>
+            <a class="btn btn-warning btn-xs btn-edit" href="javascript:;" data-status="rejected">拒绝</a>
+          {{else}}
+            <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+          {{/if}}
         </td>
       </tr>
     {{/for}}
   </script>
   <script>
-    // 通过ajax获取数据
-    $.get('/admin/api/comments.php',{},function(res){
-      // console.log(res);
-      var html = $('#comments_tmpl').render({ comments:res });
-      $('tbody').html(html);
-    });
-    // <!-- TODO: 处理数据转换问题 -->
+   /**
+    * 获取分页数据并渲染
+    * @param int page 查询第几页的数据
+    */
+    function loadPageDate(page){
+      // 获取元素
+      var tbody = $('tbody');
+      // 通过ajax获取数据
+      tbody.fadeOut();
+      $.get('/admin/api/comments.php',{ page:page },function(res){
+        // 使用jquery分页库生成分页数据
+        $('.pagination').twbsPagination({
+          totalPages: res['total_page'],
+          visiblePages: 5,
+          initiateStartPageClick: false,
+          onPageClick: function(e,page){
+            loadPageDate(page);
+          }
+        });
+        // 获取当前页面应该展示的数据并渲染
+        var tr = $('#comments_tmpl').render({ comments:res['comments'] });
+        $('tbody').html(tr);
+        tbody.fadeIn();
+      });
+    }
+    // 初始化页面
+    loadPageDate(1);
   </script>
   <script>NProgress.done()</script>
 </body>
