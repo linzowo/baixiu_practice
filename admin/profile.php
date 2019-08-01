@@ -36,7 +36,7 @@ bx_check_login_status();
           <div class="col-sm-6">
             <label class="form-image">
               <input id="avatar" type="file">
-              <img src="/static/assets/img/default.png">
+              <img src="/static/assets/img/default.png" width="200">
               <i class="mask fa fa-upload"></i>
             </label>
           </div>
@@ -84,36 +84,26 @@ bx_check_login_status();
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
   <script>
-    // TODO: 通过ajax存储用户头像
+    // 通过ajax存储用户头像
     $('#avatar').on('change', function() {
-      // 获取文件域中的内容
       var avatar = $(this);
       var files = avatar.prop('files');
-      // 取消了上传文件就直接返回
-      if (!files.length) return;
-      // 获取文件
-      var file = files[0];
-      // 将图片文件转换为二进制文件传递
-      var data = new FormData();
-      data.append('avatar',file);// 将数据添加到对象中
+      if(!files.length > 0) return;
 
-      // 原生方式
-      // 创建一个ajax对象
-      var xhr = new XMLHttpRequest();
-      // 创建一个链接
-      xhr.open('POST', '../admin/api/profile-avatar.php');
-      // 发送链接
-      xhr.send(data);
-      // 等待完成
-      xhr.onload = function() {
-        // console.log(this.responseText);
-        // 展示头像
-        avatar.siblings('img').attr('src',this.responseText);
-      }
-
-
-      // jquery方式
-
+      // 上传文件
+      var formData = new FormData();
+      formData.append('avatar',files[0]);
+      $.ajax({
+        url: '/admin/api/profile-avatar.php',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: formData,
+        type: 'post',
+        success: function(res){
+          avatar.siblings('img').attr('src',res).fadeIn;
+        }
+      });
     });
   </script>
   <script>
