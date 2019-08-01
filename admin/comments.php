@@ -210,6 +210,7 @@ bx_check_login_status();
             <th class="text-center" width="40"><input type="checkbox"></th>
             <th class="text-center">作者</th>
             <th>评论</th>
+            <th>楼上</th>
             <th>评论在</th>
             <th>提交于</th>
             <th class="text-center">状态</th>
@@ -234,6 +235,7 @@ bx_check_login_status();
       <td class="text-center"><input type="checkbox"></td>
       <td class="text-center" width="100">{{:author}}</td>
       <td>{{:content}}</td>
+      <td>{{:parent_content}}</td>
       <td style=" white-space:nowrap">《{{:post_title}}》</td>
       <td width="100">{{:created}}</td>
       <td class="text-center" width="100">{{:status === 'rejected'?'拒绝':status === 'held'?'待审核': '通过'}}</td>
