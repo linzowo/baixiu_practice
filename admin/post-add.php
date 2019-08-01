@@ -116,7 +116,7 @@ function post_add()
     $msg = '存入数据库失败';
     return;
   }
-  // TODO: 展示新增数据
+  // 展示新增数据
   header('Location: /admin/posts.php');
 }
 ?>

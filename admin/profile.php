@@ -1,9 +1,10 @@
-<?php 
+<?php
 require_once '../function.php';
 bx_check_login_status();
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <title>Dashboard &laquo; Admin</title>
@@ -13,8 +14,11 @@ bx_check_login_status();
   <link rel="stylesheet" href="/static/assets/css/admin.css">
   <script src="/static/assets/vendors/nprogress/nprogress.js"></script>
 </head>
+
 <body>
-  <script>NProgress.start()</script>
+  <script>
+    NProgress.start()
+  </script>
 
   <div class="main">
     <?php include 'inc/navbar.php'; ?>
@@ -75,10 +79,46 @@ bx_check_login_status();
   </div>
 
   <?php $current_page = 'profile'; ?>
-    <?php include 'inc/slider.php'; ?>
+  <?php include 'inc/slider.php'; ?>
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
-  <script>NProgress.done()</script>
+  <script>
+    // TODO: 通过ajax存储用户头像
+    $('#avatar').on('change', function() {
+      // 获取文件域中的内容
+      var avatar = $(this);
+      var files = avatar.prop('files');
+      // 取消了上传文件就直接返回
+      if (!files.length) return;
+      // 获取文件
+      var file = files[0];
+      // 将图片文件转换为二进制文件传递
+      var data = new FormData();
+      data.append('avatar',file);// 将数据添加到对象中
+
+      // 原生方式
+      // 创建一个ajax对象
+      var xhr = new XMLHttpRequest();
+      // 创建一个链接
+      xhr.open('POST', '../admin/api/profile-avatar.php');
+      // 发送链接
+      xhr.send(data);
+      // 等待完成
+      xhr.onload = function() {
+        // console.log(this.responseText);
+        // 展示头像
+        avatar.siblings('img').attr('src',this.responseText);
+      }
+
+
+      // jquery方式
+
+    });
+  </script>
+  <script>
+    NProgress.done()
+  </script>
 </body>
+
 </html>

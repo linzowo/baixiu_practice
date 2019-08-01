@@ -4,7 +4,6 @@ bx_check_login_status();
 ?>
 <?php
 // TODO: 批准
-// TODO: 删除
 // // TODO: 批量删除
 ?>
 <!DOCTYPE html>
@@ -309,7 +308,7 @@ bx_check_login_status();
     // 初始化页面
     loadPageDate();
 
-    // TODO: 添加删除功能
+    // 删除功能
     // =====================================
     // 注册点击事件==>因为删除按钮是动态加载的==>需要通过父元素委托注册点击事件
     $('tbody').on('click', '.btn-delete', function() {
