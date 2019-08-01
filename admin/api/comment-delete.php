@@ -15,9 +15,9 @@ foreach ($inputArr as $key => $value) {
 }
 $idStr = implode(',',$inputArr);
 // 删除数据库数据==》可批量和单条删除
-$sql = "DELETE FROM comments WHERE id IN ({$idStr});";
+$sql = "UPDATE comments SET `status` = 'trashed' WHERE id IN ({$idStr});";
 
-$result = bx_delete_data_to_db($sql);
+$result = bx_edit_data_to_db($sql);
 header('Content-Type: application/json');
 echo json_encode($result > 0);
 

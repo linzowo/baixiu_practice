@@ -12,6 +12,7 @@ comments.* ,
 posts.title as post_title
 FROM comments 
 INNER JOIN posts on comments.post_id = posts.id 
+WHERE comments.`status` != 'trashed'
 ORDER BY comments.created DESC 
 LIMIT {$offset},{$size};");
 
