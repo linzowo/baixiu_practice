@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>jsonp练习-豆瓣正在热映</title>
+</head>
+<body>
+    <ul>
+    </ul>
+
+    <script src="../static/assets/vendors/jquery/jquery.js"></script>
+    <!-- 原生jsonp -->
+    <script>
+        function test(data){
+            // console.log(data['subjects']);
+            for(var i=0;i<data['subjects'].length;i++){
+                var li = $('<li></li>');
+                li.html(data['subjects'][i]['title']);
+                li.appendTo($('ul'));
+                // console.log(data['subjects'][i]['title']);
+            }
+        }
+    </script>
+    <script src="http://api.douban.com/v2/movie/in_theaters?apikey=0b2bdeda43b5688921839c8ecb20399b&start=0&count=47&callback=test"></script>
+</body>
+</html>
