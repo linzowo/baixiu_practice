@@ -241,11 +241,12 @@ bx_check_login_status();
       <td class="text-center" width="100">{{:status === 'rejected'?'拒绝':status === 'held'?'待审核': '通过'}}</td>
       <td class="text-center" width='150'>
         {{if status === 'held'}}
-        <a href="post-add.html" class="btn btn-info btn-xs">批准</a>
-        <a class="btn btn-warning btn-xs btn-edit" href="javascript:;" data-status="rejected">拒绝</a>
-        {{else}}
-          <a href="javascript:;" class="btn btn-danger btn-xs btn-delete">删除</a>
-          {{/if}}
+          <a href="javascript:;" class="btn btn-info btn-xs btn-approved" data-status = "approved">批准</a>
+          <a class="btn btn-warning btn-xs btn-edit btn-rejected" href="javascript:;" data-status="rejected">拒绝</a>
+        {{else status === 'rejected'}}
+          <a href="javascript:;" class="btn btn-info btn-xs btn-approved" data-status = "approved">批准</a>
+        {{/if}}
+        <a href="javascript:;" class="btn btn-danger btn-xs btn-delete" data-status = "delete">删除</a>
       </td>
     </tr>
     {{/for}}
@@ -310,21 +311,21 @@ bx_check_login_status();
     // 初始化页面
     loadPageDate();
 
-    // 删除功能
+    // 评论状态编辑功能
     // =====================================
-    // 注册点击事件==>因为删除按钮是动态加载的==>需要通过父元素委托注册点击事件
-    $('tbody').on('click', '.btn-delete', function() {
-      // 获取要删除的id
+    // 注册点击事件==>因为状态选择按钮是动态加载的==>需要通过父元素委托注册点击事件
+    $('tbody').on('click', '.btn-delete,.btn-approved,.btn-rejected', function() {
+      // 获取要编辑的id
       var id = $(this).parent().parent().data('id');
-      // 发起一个ajax请求删除数据
-      $.get('/admin/api/comment-delete.php', { id : id }, function(res) {
+      // 获取编辑方式
+      var status = $(this).data('status');
+      // 发起一个ajax请求编辑数据
+      $.get('/admin/api/comment-edit.php', { id : id, status : status }, function(res) {
         // console.log(res);
-        if (!res) return; // 如果删除失败什么都不做
+        if (!res) return; // 如果编辑失败什么都不做
         // 重新获取当前页数据
         loadPageDate();
       });
-      // 根据返回的情况展示页面数据
-      // 实时更新最大页码数
     });
   </script>
   <script>

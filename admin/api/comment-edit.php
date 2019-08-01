@@ -8,14 +8,22 @@ require_once('../../function.php');
 if(empty($_GET['id'])){
     exit('删除失败');
 }
+
+// 获取用户的操作需求
+$status = 'trashed';
+if(!empty($_GET['status'])){
+    $status = $_GET['status'];
+}
+
 // 防止sql注入
 $inputArr = explode(',',$_GET['id']);
 foreach ($inputArr as $key => $value) {
     $inputArr[$key] = (int)$value;
 }
 $idStr = implode(',',$inputArr);
-// 删除数据库数据==》可批量和单条删除
-$sql = "UPDATE comments SET `status` = 'trashed' WHERE id IN ({$idStr});";
+
+// 编辑数据==可单条==可批量
+$sql = "UPDATE comments SET `status` = '{$status}' WHERE id IN ({$idStr});";
 
 $result = bx_edit_data_to_db($sql);
 header('Content-Type: application/json');
