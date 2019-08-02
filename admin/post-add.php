@@ -1,6 +1,8 @@
 <!-- 引入依赖文件 -->
 <!-- 检查用户是否登录 -->
 <?php
+// 引入配置文件
+require_once '../config.php';
 require_once '../function.php';
 bx_check_login_status();
 ?>
@@ -78,12 +80,11 @@ function post_add()
   // 图片==类型==大小
   var_dump($_FILES);
   if ((!empty($_FILES['feature'])) && empty($_FILES['feature']['error'])) {
-    $allowed_img = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!in_array($_FILES['feature']['type'], $allowed_img)) {
+    if (!in_array($_FILES['feature']['type'], json_decode(BX_ALLOWED_IMG_TYPE))) {
       $msg = '图片格式不支持。';
       return;
     }
-    if ($_FILES['feature']['size'] > 10 * 1024 * 1024) { // 图片必须小于10m
+    if ($_FILES['feature']['size'] > BX_ALLOWED_IMG_SIZE) { // 图片必须小于10m
       $msg = '图片过大。';
       return;
     }

@@ -53,9 +53,9 @@ $bio = empty($_SESSION['user']['bio'])?'':$_SESSION['user']['bio'];
         <h1>我的个人资料</h1>
       </div>
       <!-- 有错误信息时展示 -->
-      <!-- <div class="alert alert-danger">
-        <strong>错误！</strong>发生XXX错误
-      </div> -->
+      <div class="alert alert-danger" id="msg">
+        <!-- <strong>错误！</strong>发生XXX错误 -->
+      </div>
       <form class="form-horizontal">
         <div class="form-group">
           <label class="col-sm-3 control-label">头像</label>
@@ -109,28 +109,98 @@ $bio = empty($_SESSION['user']['bio'])?'':$_SESSION['user']['bio'];
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script src="/config.js"></script>
   <script>
-    // 通过ajax存储用户头像
-    $('#avatar').on('change', function() {
-      var avatar = $(this);
-      var files = avatar.prop('files');
-      if(!files.length > 0) return;
+    // 声明公用函数
+    // ===========================================
+    function showMsg(msg){
+      $('#msg').html("<strong>错误！</strong>"+msg);
+      $('#msg').show();
+    }
+    function hideMsg(){
+      $('#msg').hide();
+    }
 
-      // 上传文件
-      var formData = new FormData();
-      formData.append('avatar',files[0]);
-      $.ajax({
-        url: '/admin/api/profile-avatar.php',
-        cache: false,
-        contentType: false,
-        processData: false,
-        data: formData,
-        type: 'post',
-        success: function(res){
-          avatar.siblings('img').attr('src',res).fadeIn;
+    // 页面加载完成后执行
+    // ===========================================
+    $(function(){
+      // 获取元素
+      var msg = $('#msg');
+      var avatar = $('#avatar');
+      var email = $('#email');
+      var slug = $('#slug');
+      var nickname = $('#nickname');
+      var bio = $('#bio');
+
+      // 隐藏错误信息输出框
+      msg.hide();
+
+      // 为头像选择框注册事件
+      avatar.on('change', function() {
+        // 重置头像元素
+        avatar = $(this);
+
+        // 用户是否选择了头像
+        var files = avatar.prop('files');
+        if(!files.length > 0) return;
+
+        // 获取文件
+        var file = files[0];
+        /* 
+          lastModified: 1499760445000
+          lastModifiedDate: Tue Jul 11 2017 16:07:25 GMT+0800 (中国标准时间) {}
+          name: "avatar.jpg"
+          size: 111756
+          type: "image/jpeg"
+          webkitRelativePath: ""
+        */
+        // 校验头像文件
+        // 类型
+        if(BX_ALLOWED_IMG_TYPE.indexOf(file.type) === -1){
+          // 清空选择区
+          avatar.val('');
+          // 输出提示信息
+          showMsg('图片格式不支持请重新选择');
         }
+        // 大小
+        if(file.size > BX_ALLOWED_IMG_SIZE){
+          // 清空选择区
+          avatar.val('');
+          // 输出提示信息
+          showMsg('图片过大不支持请重新新选择');
+        }
+
+        // 显示新头像
+        var img_url = window.URL.createObjectURL(file);
+        avatar.siblings('img').attr('src',img_url);
+
       });
     });
+
+    // 本地校验信息
+
+    // 本地预览头像
+    // 通过ajax存储用户头像
+    // $('#avatar').on('change', function() {
+    //   var avatar = $(this);
+    //   var files = avatar.prop('files');
+    //   if(!files.length > 0) return;
+
+    //   // 上传文件
+    //   var formData = new FormData();
+    //   formData.append('avatar',files[0]);
+    //   $.ajax({
+    //     url: '/admin/api/profile-avatar.php',
+    //     cache: false,
+    //     contentType: false,
+    //     processData: false,
+    //     data: formData,
+    //     type: 'post',
+    //     success: function(res){
+    //       avatar.siblings('img').attr('src',res).fadeIn;
+    //     }
+    //   });
+    // });
   </script>
   <script>
     NProgress.done()
