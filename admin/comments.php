@@ -192,9 +192,9 @@ bx_check_login_status();
         <h1>所有评论</h1>
       </div>
       <!-- 有错误信息时展示 -->
-      <!-- <div class="alert alert-danger">
-        <strong>错误！</strong>发生XXX错误
-      </div> -->
+      <div class="alert alert-danger" style="display:none" id="msg">
+        <!-- <strong>错误！</strong>发生XXX错误 -->
+      </div>
       <div class="page-action">
         <!-- show when multiple checked -->
         <div class="btn-batch" style="display: none" id="btn_batch">
@@ -264,6 +264,16 @@ bx_check_login_status();
         $('.lds-css').fadeOut();
     })
 
+    // 公用函数
+    // =====================================
+    function showMsg(msg){
+      $('#msg').html("<strong>错误！</strong>"+msg);
+      $('#msg').show();
+    }
+    function hideMsg(){
+      $('#msg').hide();
+    }
+
     // 初始化数据
     var size = 30; // 页大小
     var current_page = parseInt(history.state?history.state['page']:1); // 当前页码
@@ -323,7 +333,11 @@ bx_check_login_status();
       // 发起一个ajax请求编辑数据
       $.get('/admin/api/comment-edit.php', { id : id, status : status }, function(res) {
         // console.log(res);
-        if (!res) return; // 如果编辑失败什么都不做
+        if (!res) {
+          showMsg('评论状态修改失败，可能该评论状态已经是您所选状态。请重试');
+          return; 
+        };
+        hideMsg();
         // 重新获取当前页数据
         loadPageDate();
       });
@@ -359,7 +373,11 @@ bx_check_login_status();
       // 发起一个ajax请求编辑数据
       $.get('/admin/api/comment-edit.php', { id : id, status : status }, function(res) {
         // console.log(res);
-        if (!res) return; // 如果编辑失败什么都不做
+        if (!res) {
+          showMsg('评论状态修改失败，可能该评论状态已经是您所选状态。请重试');
+          return; 
+        };
+        hideMsg();
         // 重置结果数组
         batch_data_arr = [];
         $('#btn_batch').hide();
