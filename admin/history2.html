@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>页面2</title>
+  </head>
+  <body>
+    <h1>页面2</h1>
+    <button>跳转回第一页</button>
+    <script>
+        var button = document.getElementsByTagName("button")[0];
+        console.log(button);
+        
+        button.onclick = function(){
+            window.history.back();
+        }
+    </script>
+  </body>
+</html>
