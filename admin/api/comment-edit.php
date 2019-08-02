@@ -8,7 +8,7 @@ require_once('../../function.php');
 if(empty($_GET['id'])){
     exit('删除失败');
 }
-
+// var_dump($_GET['id']);
 // 获取用户的操作需求
 $status = 'trashed';
 if(!empty($_GET['status'])){

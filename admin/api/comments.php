@@ -39,7 +39,9 @@ foreach ($comments as $key => $value) {
 $total_comments = bx_get_db_data("SELECT 
 count(1) as num
 FROM comments 
-INNER JOIN posts on comments.post_id = posts.id;")[0]['num'];
+INNER JOIN posts on comments.post_id = posts.id
+WHERE comments.`status` != 'trashed';")[0]['num'];
+
 $total_page = ceil($total_comments / $size);
 // 将返回数据包装成一个对象
 $result = array(

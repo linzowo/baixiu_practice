@@ -197,10 +197,10 @@ bx_check_login_status();
       </div> -->
       <div class="page-action">
         <!-- show when multiple checked -->
-        <div class="btn-batch" style="display: none">
-          <button class="btn btn-info btn-sm">批量批准</button>
-          <button class="btn btn-warning btn-sm">批量拒绝</button>
-          <button class="btn btn-danger btn-sm">批量删除</button>
+        <div class="btn-batch" style="display: none" id="btn_batch">
+          <button class="btn btn-info btn-sm" data-status = "approved">批量批准</button>
+          <button class="btn btn-warning btn-sm" data-status="rejected">批量拒绝</button>
+          <button class="btn btn-danger btn-sm" data-status = "delete">批量删除</button>
         </div>
         <ul class="pagination pagination-sm pull-right"></ul>
       </div>
@@ -253,21 +253,23 @@ bx_check_login_status();
   </script>
   <script>
     // loading特效
+    // =====================================
     $(document)
       .ajaxStart(function() {
-        NProgress.start()
         // 加载loading图像
         $('.lds-css').fadeIn();
       })
       .ajaxStop(function() {
-        NProgress.done()
         // 关闭loading图像
         $('.lds-css').fadeOut();
     })
 
     // 初始化数据
     var size = 30; // 页大小
-    var current_page = 1; // 当前页码
+    var current_page = parseInt(localStorage.getItem('page')?localStorage.getItem('page'):1); // 当前页码
+    console.log(current_page);
+    // 评论状态编辑功能
+    // =====================================
     /**
      * 获取分页数据并渲染
      * @param int page 查询第几页的数据
@@ -295,6 +297,7 @@ bx_check_login_status();
           next: '&gt;',
           initiateStartPageClick: false,
           onPageClick: function(e, page) {
+            localStorage.setItem('page',page);
             current_page = page;
             loadPageDate();
           }
@@ -311,8 +314,6 @@ bx_check_login_status();
     // 初始化页面
     loadPageDate();
 
-    // 评论状态编辑功能
-    // =====================================
     // 注册点击事件==>因为状态选择按钮是动态加载的==>需要通过父元素委托注册点击事件
     $('tbody').on('click', '.btn-delete,.btn-approved,.btn-rejected', function() {
       // 获取要编辑的id
@@ -323,6 +324,45 @@ bx_check_login_status();
       $.get('/admin/api/comment-edit.php', { id : id, status : status }, function(res) {
         // console.log(res);
         if (!res) return; // 如果编辑失败什么都不做
+        // 重新获取当前页数据
+        loadPageDate();
+      });
+    });
+
+    
+    // TODO: 批量删除
+    // =====================================
+    // 显示删除按钮
+    // 获取批量数据
+    // 批量删除
+    var batch_data_arr = [];
+    var checked_all_obj = $('thead input');
+    // 全选
+    checked_all_obj.on('change',function(){
+      $('tbody input').prop('checked',$(this).prop('checked')).change();
+    });
+    // 获取动态加载的单选按钮
+    $('tbody').on('change','input',function(){
+      // 获取当前点击元素
+      var current_box = $(this);
+      var id = current_box.parent().parent().data('id');
+      (current_box.prop('checked') && batch_data_arr.indexOf(id) === -1) ? batch_data_arr.push(id) : batch_data_arr.splice(batch_data_arr.indexOf(id), 1);
+      batch_data_arr.length>0?$('#btn_batch').show():$('#btn_batch').hide();
+    })
+    // 为按钮注册点击事件
+    $('#btn_batch button').on('click',function(){
+      // 获取编辑方式
+      var status = $(this).data('status');
+      // console.log(status);
+      var id = batch_data_arr.toString();
+      // console.log(id);
+      // 发起一个ajax请求编辑数据
+      $.get('/admin/api/comment-edit.php', { id : id, status : status }, function(res) {
+        // console.log(res);
+        if (!res) return; // 如果编辑失败什么都不做
+        // 重置结果数组
+        batch_data_arr = [];
+        $('#btn_batch').hide();
         // 重新获取当前页数据
         loadPageDate();
       });
