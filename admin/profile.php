@@ -1,6 +1,32 @@
 <?php
 require_once '../function.php';
 bx_check_login_status();
+var_dump($_SESSION['user']);
+/* 
+array(8) {
+  ["id"]=>
+  string(1) "1"
+  ["slug"]=>
+  string(5) "admin"
+  ["email"]=>
+  string(16) "admin@linzowo.me"
+  ["password"]=>
+  string(6) "111111"
+  ["nickname"]=>
+  string(9) "管理员"
+  ["avatar"]=>
+  string(26) "/static/uploads/avatar.jpg"
+  ["bio"]=>
+  NULL
+  ["status"]=>
+  string(9) "activated"
+}
+*/
+$img_src = empty($_SESSION['user']['avatar'])?'/static/assets/img/default.png':$_SESSION['user']['avatar'];
+$email = $_SESSION['user']['email'];
+$slug = $_SESSION['user']['slug'];
+$nickname = $_SESSION['user']['nickname'];
+$bio = empty($_SESSION['user']['bio'])?'':$_SESSION['user']['bio'];
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -36,7 +62,7 @@ bx_check_login_status();
           <div class="col-sm-6">
             <label class="form-image">
               <input id="avatar" type="file">
-              <img src="/static/assets/img/default.png" width="200">
+              <img src="<?php echo $img_src; ?>" width="200">
               <i class="mask fa fa-upload"></i>
             </label>
           </div>
@@ -44,34 +70,34 @@ bx_check_login_status();
         <div class="form-group">
           <label for="email" class="col-sm-3 control-label">邮箱</label>
           <div class="col-sm-6">
-            <input id="email" class="form-control" name="email" type="type" value="w@zce.me" placeholder="邮箱" readonly>
+            <input id="email" class="form-control" name="email" type="type" value="<?php echo $email; ?>" placeholder="邮箱" readonly>
             <p class="help-block">登录邮箱不允许修改</p>
           </div>
         </div>
         <div class="form-group">
           <label for="slug" class="col-sm-3 control-label">别名</label>
           <div class="col-sm-6">
-            <input id="slug" class="form-control" name="slug" type="type" value="zce" placeholder="slug">
+            <input id="slug" class="form-control" name="slug" type="type" value="<?php echo $slug; ?>" placeholder="slug">
             <p class="help-block">https://zce.me/author/<strong>zce</strong></p>
           </div>
         </div>
         <div class="form-group">
           <label for="nickname" class="col-sm-3 control-label">昵称</label>
           <div class="col-sm-6">
-            <input id="nickname" class="form-control" name="nickname" type="type" value="汪磊" placeholder="昵称">
+            <input id="nickname" class="form-control" name="nickname" type="type" value="<?php echo $nickname; ?>" placeholder="昵称">
             <p class="help-block">限制在 2-16 个字符</p>
           </div>
         </div>
         <div class="form-group">
           <label for="bio" class="col-sm-3 control-label">简介</label>
           <div class="col-sm-6">
-            <textarea id="bio" class="form-control" placeholder="Bio" cols="30" rows="6">MAKE IT BETTER!</textarea>
+            <textarea id="bio" class="form-control" placeholder="这个人很懒什么都没有留下" cols="30" rows="6"><?php echo $bio; ?></textarea>
           </div>
         </div>
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-6">
             <button type="submit" class="btn btn-primary">更新</button>
-            <a class="btn btn-link" href="password-reset.html">修改密码</a>
+            <a class="btn btn-link" href="password-reset.php">修改密码</a>
           </div>
         </div>
       </form>
