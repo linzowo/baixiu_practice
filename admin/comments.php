@@ -266,8 +266,7 @@ bx_check_login_status();
 
     // 初始化数据
     var size = 30; // 页大小
-    var current_page = parseInt(localStorage.getItem('page')?localStorage.getItem('page'):1); // 当前页码
-    console.log(current_page);
+    var current_page = parseInt(history.state?history.state['page']:1); // 当前页码
     // 评论状态编辑功能
     // =====================================
     /**
@@ -297,7 +296,8 @@ bx_check_login_status();
           next: '&gt;',
           initiateStartPageClick: false,
           onPageClick: function(e, page) {
-            localStorage.setItem('page',page);
+            var stateObj = { 'page' : page };
+            history.pushState(stateObj,'currentPage',document.URL);
             current_page = page;
             loadPageDate();
           }

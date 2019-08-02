@@ -214,11 +214,11 @@ array(4) {
 
 // $str = '你';
 // echo strlen($str);
-$check_slug = bx_get_db_data("SELECT slug FROM posts WHERE slug = 'lcx';")[0];
-if(!$check_slug){
-  echo 'nihao';
-}
-var_dump($check_slug);
+// $check_slug = bx_get_db_data("SELECT slug FROM posts WHERE slug = 'lcx';")[0];
+// if(!$check_slug){
+//   echo 'nihao';
+// }
+// var_dump($check_slug);
 // $categories_arr = bx_get_db_data("SELECT * FROM categories;");
 // // var_dump(in_array('1',$categories_arr));
 // foreach ($categories_arr as $key => $value) {
@@ -352,11 +352,15 @@ $add_sql = sprintf(
 ?>
 
 <script>
-    localStorage.setItem('page',1);
+  //   localStorage.setItem('page',1);
 
-  if(localStorage.getItem('page')){
-    console.log(localStorage.getItem('page'));
-  }else{
-    localStorage.setItem('page',1);
-  }
+  // if(localStorage.getItem('page')){
+  //   console.log(localStorage.getItem('page'));
+  // }else{
+  //   localStorage.setItem('page',1);
+  // }
+  // console.log(window.location.href);
+  // console.log(self.location.href);
+  // console.log(document.URL);
+  // console.log(document.location);
 </script>
