@@ -233,12 +233,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       autoDownloadFontAwesome: false, // 阻止其自动下载字体文件
       element: $('#content')[0],
     });
+
     // 图片预览功能
     var dragImgUpload = new DragImgUpload(".img-thumbnail", {
-      callback: function(fileInput) {
-        $(fileInput).appendTo($('.img-thumbnail')); // 将生成的input对象添加到表单中
-      }
+      file_name: "feature"
     })
+    
     // 初始化时间
     $('#created').val(moment().format('YYYY-MM-DD HH:mm'));
   </script>

@@ -1,12 +1,23 @@
-function DragImgUpload(id,options) {
-    this.me = $(id);
+/**
+ * 
+ * @param {string} selector jquery需要的选择器 
+ * @param {*} options 
+ * img_src ==> 默认展示的图片src，可以不传
+ * file_name ==> input标签的name与id属性值
+ * callback ==> 回调函数，默认函数执行完毕后执行
+ */
+function DragImgUpload(selector,options) {
+    this.me = $(selector);
     var defaultOpt = {
         boxWidth:'200px',
         boxHeight:'auto'
     }
-    this.preview = $('<div id="preview"><img src="/static/assets/img/upload.png" class="img-responsive"  style="width: 100%;height: auto;" alt="" title=""> </div>');
     this.opts=$.extend(true, defaultOpt,{
     }, options);
+    this.img_src = this.opts.img_src?this.opts.img_src:"/static/assets/img/upload.png"; //初始化背景图==》默认upload.png
+    this.preview = $('<div id="preview"><img src="'+this.img_src+'" class="img-responsive"  style="width: 100%;height: auto;" alt="" title=""></div>');
+    this.file_name = this.opts.file_name?this.opts.file_name:"uploadImg"; //设置input标签name和id==》默认uploadImg
+    this.multiple = this.opts.multiple?this.opts.multiple:true; //是否允许上传多张图片===》默认true
     this.init();
     this.callback = this.opts.callback;
 }
@@ -15,7 +26,6 @@ function DragImgUpload(id,options) {
 DragImgUpload.prototype = {
     init:function () {
         this.me.append(this.preview);
-        this.me.append(this.fileupload);
         this.cssInit();
         this.eventClickInit();
     },
@@ -72,6 +82,9 @@ DragImgUpload.prototype = {
         var self = this;
         this.me.unbind().click(function () {
             self.createImageUploadDialog();
+            if($(self.fileInput).parent().length === 0){
+                self.preview.append($(self.fileInput)); // 将input标签加入用户选定的传入的元素中
+            }
         })
         var dp = this.me[0];
         dp.addEventListener('dragover', function(e) {
@@ -86,29 +99,29 @@ DragImgUpload.prototype = {
     onChangeUploadFile:function () {
         var fileInput = this.fileInput;
         var files = fileInput.files;
+        if(!files.length > 0) return; // 用户取消选择图片就不再向下执行
         var file = files[0];
         var img = window.URL.createObjectURL(file);
         var filename = file.name;
         this.me.find("img").attr("src",img);
         this.me.find("img").attr("title",filename);
         if(this.callback){
-            this.callback(fileInput);
+            this.callback(this);
         }
     },
     createImageUploadDialog:function () {
         var fileInput = this.fileInput;
         if (!fileInput) {
             //创建临时input元素
-            fileInput = $("<input >");
+            fileInput = $('<input>');
             fileInput.prop({
-                'id':"feature",
+                'id':this.file_name,
                 'type':'file',// 设置类型
-                'name':'feature',// 设置name
+                'name':this.file_name,// 设置name
                 'accept':"image/*",// 限制文件类型为图片
-                'multiple' : true,// 运行上传多个文件
-                'style':"display:none"
-            });
-            fileInput[0].onchange  = this.onChangeUploadFile.bind(this);
+                'multiple': true // 运行上传多个文件
+            }).hide();
+            fileInput.on('change',this.onChangeUploadFile.bind(this));
             this.fileInput = fileInput[0];
         }
         //触发点击input点击事件，弹出选择文件对话框

@@ -1,7 +1,6 @@
 <?php
 require_once '../function.php';
 bx_check_login_status();
-var_dump($_SESSION['user']);
 /* 
 array(8) {
   ["id"]=>
@@ -22,11 +21,11 @@ array(8) {
   string(9) "activated"
 }
 */
-$img_src = empty($_SESSION['user']['avatar'])?'/static/assets/img/default.png':$_SESSION['user']['avatar'];
+$img_src = empty($_SESSION['user']['avatar']) ? '/static/assets/img/default.png' : $_SESSION['user']['avatar'];
 $email = $_SESSION['user']['email'];
 $slug = $_SESSION['user']['slug'];
 $nickname = $_SESSION['user']['nickname'];
-$bio = empty($_SESSION['user']['bio'])?'':$_SESSION['user']['bio'];
+$bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -59,13 +58,7 @@ $bio = empty($_SESSION['user']['bio'])?'':$_SESSION['user']['bio'];
       <form class="form-horizontal">
         <div class="form-group">
           <label class="col-sm-3 control-label">头像</label>
-          <div class="col-sm-6">
-            <label class="form-image">
-              <input id="avatar" type="file">
-              <img src="<?php echo $img_src; ?>" width="200">
-              <i class="mask fa fa-upload"></i>
-            </label>
-          </div>
+          <div class="col-sm-6 img-thumbnail"><!-- 头像显示区域 --></div>
         </div>
         <div class="form-group">
           <label for="email" class="col-sm-3 control-label">邮箱</label>
@@ -109,24 +102,25 @@ $bio = empty($_SESSION['user']['bio'])?'':$_SESSION['user']['bio'];
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script src="/static/assets/vendors/upload/upload.js"></script><!-- 引入图片上传预览库 -->
   <script src="/config.js"></script>
   <script>
     // 声明公用函数
     // ===========================================
-    function showMsg(msg){
-      $('#msg').html("<strong>错误！</strong>"+msg);
+    function showMsg(msg) {
+      $('#msg').html("<strong>错误！</strong>" + msg);
       $('#msg').show();
     }
-    function hideMsg(){
+
+    function hideMsg() {
       $('#msg').hide();
     }
 
     // 页面加载完成后执行
     // ===========================================
-    $(function(){
+    $(function() {
       // 获取元素
       var msg = $('#msg');
-      var avatar = $('#avatar');
       var email = $('#email');
       var slug = $('#slug');
       var nickname = $('#nickname');
@@ -135,47 +129,14 @@ $bio = empty($_SESSION['user']['bio'])?'':$_SESSION['user']['bio'];
       // 隐藏错误信息输出框
       msg.hide();
 
-      // 为头像选择框注册事件
-      avatar.on('change', function() {
-        // 重置头像元素
-        avatar = $(this);
 
-        // 用户是否选择了头像
-        var files = avatar.prop('files');
-        if(!files.length > 0) return;
-
-        // 获取文件
-        var file = files[0];
-        /* 
-          lastModified: 1499760445000
-          lastModifiedDate: Tue Jul 11 2017 16:07:25 GMT+0800 (中国标准时间) {}
-          name: "avatar.jpg"
-          size: 111756
-          type: "image/jpeg"
-          webkitRelativePath: ""
-        */
-        // 校验头像文件
-        // 类型
-        if(BX_ALLOWED_IMG_TYPE.indexOf(file.type) === -1){
-          // 清空选择区
-          avatar.val('');
-          // 输出提示信息
-          showMsg('图片格式不支持请重新选择');
+      var dragImgUpload = new DragImgUpload(".img-thumbnail", {
+        img_src: "<?php echo $img_src; ?>",
+        file_name: 'avatar',
+        callback: function(e) {
+          console.log(e.fileInput);
         }
-        // 大小
-        if(file.size > BX_ALLOWED_IMG_SIZE){
-          // 清空选择区
-          avatar.val('');
-          // 输出提示信息
-          showMsg('图片过大不支持请重新新选择');
-        }
-
-        // 显示新头像
-        var img_url = window.URL.createObjectURL(file);
-        avatar.siblings('img').attr('src',img_url);
-
-      });
-    });
+      })
 
     // 本地校验信息
 

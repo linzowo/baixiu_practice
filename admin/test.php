@@ -1,3 +1,32 @@
+<script src="../static/assets/vendors/jquery/jquery.js"></script>
+<script>
+  //   localStorage.setItem('page',1);
+
+  // if(localStorage.getItem('page')){
+  //   console.log(localStorage.getItem('page'));
+  // }else{
+  //   localStorage.setItem('page',1);
+  // }
+  // console.log(window.location.href);
+  // console.log(self.location.href);
+  // console.log(document.URL);
+  // console.log(document.location);
+  // var obj = new Object();
+  // if(!obj.abc){
+  //   console.log('hh');
+  // }
+  // obj.abc = 'abc';
+  // if(obj.abc){
+
+  //   console.log(obj.abc);
+  // }
+  var divobj = $('<div id="preview"><img src="'+this.img_src+'" class="img-responsive"  style="width: 100%;height: auto;" alt="" title=""><input></div>');
+  // var input = $('<input>').appendTo(divobj);
+  // input.appendTo(divobj);
+  console.log(divobj.children('input')[0]);
+  
+</script>
+
 <?php 
 require_once '../function.php';
 // $numstr = '你好';
@@ -348,19 +377,3 @@ $add_sql = sprintf(
 
   
 */
-
-?>
-
-<script>
-  //   localStorage.setItem('page',1);
-
-  // if(localStorage.getItem('page')){
-  //   console.log(localStorage.getItem('page'));
-  // }else{
-  //   localStorage.setItem('page',1);
-  // }
-  // console.log(window.location.href);
-  // console.log(self.location.href);
-  // console.log(document.URL);
-  // console.log(document.location);
-</script>
