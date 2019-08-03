@@ -138,6 +138,9 @@ $bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
         }
       })
 
+      
+    });
+
     // 本地校验信息
 
     // 本地预览头像
