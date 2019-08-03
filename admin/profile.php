@@ -58,7 +58,9 @@ $bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
       <form class="form-horizontal">
         <div class="form-group">
           <label class="col-sm-3 control-label">头像</label>
-          <div class="col-sm-6 img-thumbnail"><!-- 头像显示区域 --></div>
+          <div class="col-sm-6 img-thumbnail">
+            <!-- 头像显示区域 -->
+          </div>
         </div>
         <div class="form-group">
           <label for="email" class="col-sm-3 control-label">邮箱</label>
@@ -84,12 +86,12 @@ $bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
         <div class="form-group">
           <label for="bio" class="col-sm-3 control-label">简介</label>
           <div class="col-sm-6">
-            <textarea id="bio" class="form-control" placeholder="这个人很懒什么都没有留下" cols="30" rows="6"><?php echo $bio; ?></textarea>
+            <textarea id="bio" class="form-control" placeholder="这个人很懒什么都没有留下" cols="30" rows="6" name="bio"><?php echo $bio; ?></textarea>
           </div>
         </div>
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-6">
-            <button type="submit" class="btn btn-primary">更新</button>
+            <a class="btn btn-primary" href="javascript:void(0);" id="submit">更新</a>
             <a class="btn btn-link" href="password-reset.php">修改密码</a>
           </div>
         </div>
@@ -110,38 +112,92 @@ $bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
     function showMsg(msg) {
       $('#msg').html("<strong>错误！</strong>" + msg);
       $('#msg').show();
+      $('#submit').addClass("disabled"); // 存在错误信息就将提交按钮变为不可选状态
     }
 
     function hideMsg() {
       $('#msg').hide();
+      $('#submit').removeClass("disabled");
     }
 
     // 页面加载完成后执行
     // ===========================================
     $(function() {
+
       // 获取元素
       var msg = $('#msg');
       var email = $('#email');
       var slug = $('#slug');
       var nickname = $('#nickname');
       var bio = $('#bio');
+      var submit = $('#submit');
 
       // 隐藏错误信息输出框
       msg.hide();
 
-
+      // 文件选择框添加预览及拖拽上传功能
       var dragImgUpload = new DragImgUpload(".img-thumbnail", {
         img_src: "<?php echo $img_src; ?>",
-        file_name: 'avatar',
-        callback: function(e) {
-          console.log(e.fileInput);
-        }
+        file_name: 'avatar'
       })
 
-      
-    });
+      // 当页面失去焦点时，检查所有输入框的内容是否符合规范
+      $('form').on('blur','input,textarea',function(){
+        let msg = '以下内容不规范：';
+        // 测试slug
+        msg += /^[a-zA-Z0-9]*$/.test(slug.val())?'':'别名 ';
+        // 测试nickname
+        msg += /^[^\s]{2,16}$/.test(nickname.val())?'':'昵称 ';
 
-    // 本地校验信息
+        if(msg !== '以下内容不规范：'){
+          showMsg(msg);
+          return;
+        }
+        hideMsg();
+      })
+
+      // 为提交按钮注册事件
+      submit.on('click',function(){
+        
+        // 存在错误信息就不跳转
+        if($('#msg').attr('style') === 'display: block;') return;
+        // 获取表单元素
+        // =======================================
+
+        // 获取基本表单
+        var inputObj = $('form input');
+        
+        // 获取文本域
+        inputObj.push($('form textarea')[0]);
+
+        // 将表单内容添加到formData对象中
+        var formData = new FormData();
+        inputObj.each(function(i,ele){
+          // 添加图片文件
+          if($(ele).prop('type') === 'file'){
+            formData.append($(ele).prop('name'),$(ele).prop('files')[0]);
+            return true;
+          }
+          formData.append($(ele).prop('name'),$(ele).val());
+        });
+        
+
+        // 发起ajax请求
+        $.ajax({
+          url: '/admin/api/profile.php',
+          cache: false,
+          contentType: false,
+          processData: false,
+          data: formData,
+          type: 'post',
+          success: function(res){
+            console.log(res);
+          }
+        });
+
+      });
+
+    });
 
     // 本地预览头像
     // 通过ajax存储用户头像

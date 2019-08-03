@@ -5,6 +5,8 @@
  * img_src ==> 默认展示的图片src，可以不传
  * file_name ==> input标签的name与id属性值
  * callback ==> 回调函数，默认函数执行完毕后执行
+ * multiple==> 是否允许上传多张图片===》默认true允许
+ * allowed_size ==> 允许上传的最大图片大小===默认512kb
  */
 function DragImgUpload(selector,options) {
     this.me = $(selector);
@@ -18,6 +20,7 @@ function DragImgUpload(selector,options) {
     this.preview = $('<div id="preview"><img src="'+this.img_src+'" class="img-responsive"  style="width: 100%;height: auto;" alt="" title=""></div>');
     this.file_name = this.opts.file_name?this.opts.file_name:"uploadImg"; //设置input标签name和id==》默认uploadImg
     this.multiple = this.opts.multiple?this.opts.multiple:true; //是否允许上传多张图片===》默认true
+    this.allowed_size = this.opts.allowed_size?this.opts.allowed_size:512; // 默认最大图片大小512kb
     this.init();
     this.callback = this.opts.callback;
 }
@@ -66,9 +69,9 @@ DragImgUpload.prototype = {
         //拖拉图片到浏览器，可以实现预览功能
         var img = window.URL.createObjectURL(fileList[0]);
         var filename = fileList[0].name; //图片名称
-        var filesize = Math.floor(((fileList[0].size)/1024)/1024);
-        if(filesize>10){
-            alert("上传大小不能超过10M.");
+        var filesize = Math.floor((fileList[0].size)/1024);
+        if(filesize>this.allowed_size){
+            alert("上传的图片过大");
             return false;
         }
 

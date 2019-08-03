@@ -2,10 +2,6 @@
 require_once '../function.php';
 bx_check_login_status();
 ?>
-<?php
-// TODO: 批准
-// // TODO: 批量删除
-?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -344,11 +340,8 @@ bx_check_login_status();
     });
 
     
-    // TODO: 批量删除
+    // 批量处理
     // =====================================
-    // 显示删除按钮
-    // 获取批量数据
-    // 批量删除
     var batch_data_arr = [];
     var checked_all_obj = $('thead input');
     // 全选

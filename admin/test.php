@@ -20,11 +20,20 @@
 
   //   console.log(obj.abc);
   // }
-  var divobj = $('<div id="preview"><img src="'+this.img_src+'" class="img-responsive"  style="width: 100%;height: auto;" alt="" title=""><input></div>');
-  // var input = $('<input>').appendTo(divobj);
-  // input.appendTo(divobj);
-  console.log(divobj.children('input')[0]);
+  // var divobj = $('<div id="preview"><img src="'+this.img_src+'" class="img-responsive"  style="width: 100%;height: auto;" alt="" title=""><input></div>');
+  // // var input = $('<input>').appendTo(divobj);
+  // // input.appendTo(divobj);
+  // console.log(divobj.children('input')[0]);
   
+  // var array = ['ni','hao'];
+  // console.log(Object.prototype.toString.call(array));
+
+  var a = [];
+  if(Object.prototype.toString.call(a) === '[object Array]'){
+    console.log('是array');
+  }else{
+    console.log('不是');
+  }
 </script>
 
 <?php 
