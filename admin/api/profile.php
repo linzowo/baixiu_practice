@@ -37,9 +37,11 @@ array(5) {
 // echo substr($target,5);
 
 var_dump($_POST);
-var_dump($_FILES);
+// var_dump($_FILES);
 /* 
-array(4) {
+array(5) {
+  ["id"]=>
+  string(1) "1"
   ["email"]=>
   string(16) "admin@linzowo.me"
   ["slug"]=>
@@ -65,3 +67,59 @@ array(1) {
   }
 }
 */
+// 引入依赖函数
+require_once('../../function.php');
+
+// 是否有id
+if(empty($_POST['id'])){
+  exit('缺少必要参数。');
+}
+
+// 初始化变量
+$msg = '';
+$edit_sql = array();
+
+// 接收数据
+$id = $_POST['id'];
+$slug = $_POST['slug'];
+$nickname = $_POST['nickname'];
+$bio = addslashes($_POST['bio']);
+
+// 校验用户数据
+// slug为空就不修改这一项
+if(!empty($_POST['slug'])){
+  // slug必须唯一
+  $has_slug = bx_get_db_data("SELECT slug FROM users WHERE slug = '{$slug}' AND id != '{$id}';");
+  if($has_slug){
+    $msg.='此slug已经存在';
+  }else{
+    $edit_sql[]="slug = '{$slug}'";
+  }
+}
+
+// 是否存在nickname
+if((!empty($_POST['nickname']))){
+  if(!preg_match("/^[^\s]{2,16}$/",$nickname)){
+    $msg.='昵称不符合规范';
+  }else{
+    $edit_sql[]="nickname = '{$nickname}'";
+  }
+}
+
+// 是否存在bio
+if(!empty($bio)){
+  $edit_sql[]="bio = '{$bio}'";
+}
+
+// 将$edit_sql转为字符串
+if(!empty($edit_sql)){
+  $edit_sql = join(',',$edit_sql);
+}
+
+// 校验图片
+
+
+
+// 存储用户数据
+$result = bx_edit_data_to_db("UPDATE users SET slug = '',nickname = '',avatar = '',bio = '' WHERE id = ;");
+echo $msg."======".$edit_sql;

@@ -86,7 +86,7 @@ $bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
         <div class="form-group">
           <label for="bio" class="col-sm-3 control-label">简介</label>
           <div class="col-sm-6">
-            <textarea id="bio" class="form-control" placeholder="这个人很懒什么都没有留下" cols="30" rows="6" name="bio"><?php echo $bio; ?></textarea>
+            <textarea id="bio" class="form-control" placeholder="这个人很懒什么都没有留下" cols="30" rows="6" name="bio"><?php echo stripslashes($bio); ?></textarea>
           </div>
         </div>
         <div class="form-group">
@@ -125,6 +125,7 @@ $bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
     $(function() {
 
       // 获取元素
+      var userId = <?php echo $_SESSION['user']['id']; ?>;
       var msg = $('#msg');
       var email = $('#email');
       var slug = $('#slug');
@@ -172,6 +173,7 @@ $bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
 
         // 将表单内容添加到formData对象中
         var formData = new FormData();
+        formData.append('id',userId);
         inputObj.each(function(i,ele){
           // 添加图片文件
           if($(ele).prop('type') === 'file'){

@@ -173,3 +173,8 @@ function bx_get_paging($max_page,$format,$visibles=5)
     }
     
 }
+
+/**
+ * 校验图片
+ * 
+ */
