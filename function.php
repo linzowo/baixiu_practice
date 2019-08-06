@@ -176,5 +176,25 @@ function bx_get_paging($max_page,$format,$visibles=5)
 
 /**
  * 校验图片
- * 
+ * @param string $file_name $_FILES中的key
+ * @param string $upload_folder 
  */
+function bx_check_upload_img($file_name, $upload_folder)
+{
+    if (!substr_count($_FILES[$file_name]['type'], 'image')) {
+        return false;
+    }
+
+    if ($_FILES[$file_name]['size'] > BX_ALLOWED_IMG_SIZE) { // 图片必须小于10m
+        return false;
+    }
+    // 存储图片到指定位置
+    $target_folder = "{$upload_folder}/" . time() . '.' . substr($_FILES[$file_name]['type'], 6);
+    $temp_file = $_FILES[$file_name]['tmp_name'];
+    if (!move_uploaded_file($temp_file, $target_folder)) {
+        return false;
+    }
+    $img_path = substr($target_folder, 2);
+    return $img_path; // 返回图片在网站根目录地址===》/static/uploads/xxxx.jpg
+}
+
