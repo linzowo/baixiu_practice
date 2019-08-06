@@ -193,7 +193,10 @@ $bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
           data: formData,
           type: 'post',
           success: function(res){
-            console.log(res);
+            if(res === 'success'){
+              location.reload()
+            }
+            showMsg(res);
           }
         });
 

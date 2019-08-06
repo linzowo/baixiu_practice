@@ -1,4 +1,4 @@
-<?php 
+<?php
 // var_dump($_FILES['avatar']);
 /* 
 array(5) {
@@ -36,7 +36,7 @@ array(5) {
 // // 返回已上传头像的存储地址
 // echo substr($target,5);
 
-var_dump($_POST);
+// var_dump($_POST);
 // var_dump($_FILES);
 /* 
 array(5) {
@@ -71,12 +71,12 @@ array(1) {
 require_once('../../function.php');
 
 // 是否有id
-if(empty($_POST['id'])){
+if (empty($_POST['id'])) {
   exit('缺少必要参数。');
 }
 
 // 初始化变量
-$msg = '';
+$msg = array();
 $edit_sql = array();
 
 // 接收数据
@@ -87,39 +87,55 @@ $bio = addslashes($_POST['bio']);
 
 // 校验用户数据
 // slug为空就不修改这一项
-if(!empty($_POST['slug'])){
+if (!empty($_POST['slug'])) {
   // slug必须唯一
   $has_slug = bx_get_db_data("SELECT slug FROM users WHERE slug = '{$slug}' AND id != '{$id}';");
-  if($has_slug){
-    $msg.='此slug已经存在';
-  }else{
-    $edit_sql[]="slug = '{$slug}'";
+  if ($has_slug) {
+    $msg[] = '此slug已经存在';
+  } else {
+    $edit_sql[] = "slug = '{$slug}'";
   }
 }
 
 // 是否存在nickname
-if((!empty($_POST['nickname']))){
-  if(!preg_match("/^[^\s]{2,16}$/",$nickname)){
-    $msg.='昵称不符合规范';
-  }else{
-    $edit_sql[]="nickname = '{$nickname}'";
+if ((!empty($_POST['nickname']))) {
+  if (!preg_match("/^[^\s]{2,16}$/", $nickname)) {
+    $msg[] = '昵称不符合规范';
+  } else {
+    $edit_sql[] = "nickname = '{$nickname}'";
   }
 }
 
 // 是否存在bio
-if(!empty($bio)){
-  $edit_sql[]="bio = '{$bio}'";
+$edit_sql[] = "bio = '{$bio}'";
+
+// 校验图片
+if (!empty($_FILES['avatar']) && empty($_FILES['avatar']['error'])) {
+  $avatar = bx_check_upload_img('avatar', '../../static/uploads');
+  if (!$avatar) {
+    $msg[] = '图片上传失败';
+  } else {
+    $edit_sql[] = "avatar = '{$avatar}'";
+  }
+}
+
+// 如果存在错误信息说明数据有问题直接返回错误信息
+if (!empty($msg)) {
+  $msg = join(',', $msg);
+  exit($msg);
 }
 
 // 将$edit_sql转为字符串
-if(!empty($edit_sql)){
-  $edit_sql = join(',',$edit_sql);
-}
-
-// 校验图片
-
-
+$edit_sql = join(',', $edit_sql);
 
 // 存储用户数据
-$result = bx_edit_data_to_db("UPDATE users SET slug = '',nickname = '',avatar = '',bio = '' WHERE id = ;");
-echo $msg."======".$edit_sql;
+$result = bx_edit_data_to_db("UPDATE users SET {$edit_sql} WHERE id = {$id};");
+
+// 如果存储成功更新user信息
+if ($result) {
+  session_start();
+  $_SESSION['user'] = bx_get_db_data("SELECT * FROM users WHERE id = '{$id}' LIMIT 1;")[0];
+  echo 'success';
+}else{
+  exit("你可能什么都没有修改");
+}

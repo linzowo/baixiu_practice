@@ -106,8 +106,8 @@ function bx_delete_data_to_db($sql)
  * @example 
  * <?php bx_get_paging(10,'/list.php?page=%d',5); ?>
  */
-function bx_get_paging($max_page,$format,$visibles=5)
-{ 
+function bx_get_paging($max_page, $format, $visibles = 5)
+{
     // 获取数据库数据总条数===》解决查询范围溢出的问题
     // 获取最大页码
     $max_page = (int) $max_page;  // 最大页数
@@ -151,37 +151,39 @@ function bx_get_paging($max_page,$format,$visibles=5)
     }
     // 输出页面按钮
     // 上一页
-    if($page > 1){
-        printf('<li><a href="%s">上一页</a></li>',sprintf($format,$previous_page));
+    if ($page > 1) {
+        printf('<li><a href="%s">上一页</a></li>', sprintf($format, $previous_page));
     }
     // 省略号
-    if (($page > 3)&&($max_page > 5)){
+    if (($page > 3) && ($max_page > 5)) {
         echo '<li><span>...</span></li>';
     }
     // 分页页码
     for ($i = $begin; $i < $end; $i++) {
         $activeClass = $page === $i ? " class='active'" : '';
-        printf('<li%s><a href="%s">%s</a></li>',$activeClass,sprintf($format,$i),$i);
+        printf('<li%s><a href="%s">%s</a></li>', $activeClass, sprintf($format, $i), $i);
     }
     // 省略号 
-    if(($page < ($max_page - $region))&&($max_page > 5)){
+    if (($page < ($max_page - $region)) && ($max_page > 5)) {
         echo '<li><span>...</span></li>';
     }
     // 下一页
-    if($page < $max_page){
-        printf('<li><a href="%s">下一页</a></li>',sprintf($format,$next_page));
+    if ($page < $max_page) {
+        printf('<li><a href="%s">下一页</a></li>', sprintf($format, $next_page));
     }
-    
 }
 
 /**
  * 校验图片
  * @param string $file_name $_FILES中的key
- * @param string $upload_folder 
+ * @param string $upload_folder 存储图片的文件夹的相对路径
+ * @return bool|string false | $img_path(图片的绝对路径)
+ * @example bx_check_upload_img('avatar','../static/uploads')
+ * 
  */
 function bx_check_upload_img($file_name, $upload_folder)
 {
-    if (!substr_count($_FILES[$file_name]['type'], 'image')) {
+    if (!substr_count($_FILES[$file_name]['type'], 'image')) { // 检查是否是图片类型
         return false;
     }
 
@@ -189,12 +191,14 @@ function bx_check_upload_img($file_name, $upload_folder)
         return false;
     }
     // 存储图片到指定位置
-    $target_folder = "{$upload_folder}/" . time() . '.' . substr($_FILES[$file_name]['type'], 6);
+    $img_name = time() . '.' . pathinfo($_FILES[$file_name]['name'], PATHINFO_EXTENSION);
+    $target_folder = "{$upload_folder}" . '/' . $img_name;
     $temp_file = $_FILES[$file_name]['tmp_name'];
     if (!move_uploaded_file($temp_file, $target_folder)) {
         return false;
     }
-    $img_path = substr($target_folder, 2);
+    // 相对路径==>绝对路径
+    $path_arr = explode('../', $target_folder);
+    $img_path = '/'.end($path_arr);
     return $img_path; // 返回图片在网站根目录地址===》/static/uploads/xxxx.jpg
 }
-

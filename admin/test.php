@@ -28,12 +28,12 @@
   // var array = ['ni','hao'];
   // console.log(Object.prototype.toString.call(array));
 
-  var a = [];
-  if(Object.prototype.toString.call(a) === '[object Array]'){
-    console.log('是array');
-  }else{
-    console.log('不是');
-  }
+  // var a = [];
+  // if(Object.prototype.toString.call(a) === '[object Array]'){
+  //   console.log('是array');
+  // }else{
+  //   console.log('不是');
+  // }
 </script>
 
 <?php 
@@ -386,3 +386,20 @@ $add_sql = sprintf(
 
   
 */
+// 相对路径==>绝对路径
+// $target_folder = "../../baixiu/admin/profile.php";
+// $path_arr = explode('/',$target_folder);
+// var_dump($path_arr);
+// foreach ($path_arr as $key => $value) {
+//     if($value === '..'){
+//         unset($path_arr[$key]);
+//     }
+// }
+// $img_path = '/'.join('/',$path_arr);
+// echo $img_path;
+
+$target_folder = "../../baixiu/admin/profile.php";
+$path_arr = explode('../',$target_folder);
+var_dump($path_arr);
+$img_path = end($path_arr);
+echo $img_path;
