@@ -1,26 +1,6 @@
 <?php
 require_once '../function.php';
 bx_check_login_status();
-/* 
-array(8) {
-  ["id"]=>
-  string(1) "1"
-  ["slug"]=>
-  string(5) "admin"
-  ["email"]=>
-  string(16) "admin@linzowo.me"
-  ["password"]=>
-  string(6) "111111"
-  ["nickname"]=>
-  string(9) "管理员"
-  ["avatar"]=>
-  string(26) "/static/uploads/avatar.jpg"
-  ["bio"]=>
-  NULL
-  ["status"]=>
-  string(9) "activated"
-}
-*/
 $img_src = empty($_SESSION['user']['avatar']) ? '/static/assets/img/default.png' : $_SESSION['user']['avatar'];
 $email = $_SESSION['user']['email'];
 $slug = $_SESSION['user']['slug'];
@@ -203,29 +183,6 @@ $bio = empty($_SESSION['user']['bio']) ? '' : $_SESSION['user']['bio'];
       });
 
     });
-
-    // 本地预览头像
-    // 通过ajax存储用户头像
-    // $('#avatar').on('change', function() {
-    //   var avatar = $(this);
-    //   var files = avatar.prop('files');
-    //   if(!files.length > 0) return;
-
-    //   // 上传文件
-    //   var formData = new FormData();
-    //   formData.append('avatar',files[0]);
-    //   $.ajax({
-    //     url: '/admin/api/profile-avatar.php',
-    //     cache: false,
-    //     contentType: false,
-    //     processData: false,
-    //     data: formData,
-    //     type: 'post',
-    //     success: function(res){
-    //       avatar.siblings('img').attr('src',res).fadeIn;
-    //     }
-    //   });
-    // });
   </script>
   <script>
     NProgress.done()
