@@ -1,9 +1,10 @@
-<?php 
+<?php
 require_once '../function.php';
 bx_check_login_status();
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <title>Navigation menus &laquo; Admin</title>
@@ -13,8 +14,11 @@ bx_check_login_status();
   <link rel="stylesheet" href="/static/assets/css/admin.css">
   <script src="/static/assets/vendors/nprogress/nprogress.js"></script>
 </head>
+
 <body>
-  <script>NProgress.start()</script>
+  <script>
+    NProgress.start()
+  </script>
 
   <div class="main">
     <nav class="navbar">
@@ -29,9 +33,9 @@ bx_check_login_status();
         <h1>导航菜单</h1>
       </div>
       <!-- 有错误信息时展示 -->
-      <!-- <div class="alert alert-danger">
+      <div class="alert alert-danger" id="msg" style="display:none">
         <strong>错误！</strong>发生XXX错误
-      </div> -->
+      </div>
       <div class="row">
         <div class="col-md-4">
           <form>
@@ -49,7 +53,7 @@ bx_check_login_status();
               <input id="href" class="form-control" name="href" type="text" placeholder="链接">
             </div>
             <div class="form-group">
-              <button class="btn btn-primary" type="submit">添加</button>
+              <a class="btn btn-primary" href="javascript:;" id="submit">添加</a>
             </div>
           </form>
         </div>
@@ -69,7 +73,7 @@ bx_check_login_status();
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <!-- <tr>
                 <td class="text-center"><input type="checkbox"></td>
                 <td><i class="fa fa-glass"></i>奇趣事</td>
                 <td>奇趣事</td>
@@ -95,7 +99,7 @@ bx_check_login_status();
                 <td class="text-center">
                   <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
                 </td>
-              </tr>
+              </tr> -->
             </tbody>
           </table>
         </div>
@@ -104,10 +108,152 @@ bx_check_login_status();
   </div>
 
   <?php $current_page = 'nav-menus'; ?>
-    <?php include 'inc/slider.php'; ?>
+  <?php include 'inc/slider.php'; ?>
 
   <script src="/static/assets/vendors/jquery/jquery.js"></script>
   <script src="/static/assets/vendors/bootstrap/js/bootstrap.js"></script>
-  <script>NProgress.done()</script>
+  <script src="/static/assets/vendors/jsrender/jsrender.js"></script>
+  <script id="options_tmpl" type="text/x-jsrender">
+    {{for options}}
+    <tr>
+      <td class="text-center"><input type="checkbox"></td>
+      <td><i class="{{:icon}}"></i>{{:text}}</td>
+      <td>{{:title}}</td>
+      <td>{{:link}}</td>
+      <td class="text-center">
+        <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+      </td>
+    </tr>
+    {{/for}}
+  </script>
+  <script>
+    // 显示错误信息
+    function notify(msg) {
+      $('#msg').html("<strong>错误！</strong>" + msg).fadeIn();
+      // 3000ms后隐藏
+      setTimeout(function() {
+        $('#msg').fadeOut();
+      }, 3000);
+    }
+
+    // 页面加载完成后执行
+    // ============================
+    $(function() {
+      // function loadData() {
+      //   $.get('/admin/options.php', {
+      //     key: 'nav_menus'
+      //   }, function(res) {
+      //     if (res['success']) {
+      //       // 使用模板字符串渲染数据
+      //       let tr = $('#options_tmpl').render({
+      //         options: JSON.parse(res['data'][0]['value'])
+      //       });
+      //       $('tbody').html(tr);
+      //       $('tbody').fadeIn();
+      //     } else {
+      //       notify(res['msg']);
+      //     }
+      //   });
+      // }
+      // loadData();
+
+      // 动态加载设置数据
+      /**
+       * 获取nav_menus的数据
+       * @param {function} callback 处理获取到的数据
+       */
+      function loadData(callback) {
+        $.get('/admin/options.php', {
+          key: 'nav_menus'
+        }, function(res) {
+          if (!res['success']) { // 如果返回结果失败
+            return callback(new Error(res['msg']));
+          }
+
+          var menus = []; // 声明一个空数组接收返回数据
+
+          try {
+            // 尝试以json方式解析数据
+            menus = JSON.parse(res['data'][0]['value']);
+          } catch {
+            callback(new Error('获取数据失败'))
+          }
+          callback(null, menus);
+        });
+      }
+      loadData(function(err, data) {
+        if (err) return notify(err.message);
+        $('tbody').html($('#options_tmpl').render({
+          options: data
+        }));
+      });
+
+      // TODO: 新增设置
+      function addNavLink() {
+        // text title href
+        // 获取按钮
+        let btn = $('#submit');
+        // 为文本框注册检测事件
+        // 创建一个正则对照对象
+        let regexpObj = {
+          'text': /^[^\s]{1,16}$/,
+          'title': /^[^\s]{1,16}$/,
+          'href': /^\/[a-z0-9]+\/[a-z0-9]+$/
+        }
+
+        // 名称对照表
+        let nameObj = {
+          'text': '文本',
+          'title': '标题',
+          'href': '连接'
+        }
+        // 声明一个状态记录变量。记录现在有几个输入框通过了测试
+        // var status = 0;
+        // $('form').on('blur', 'input', function() {
+        //   let id = $(this).attr('id')
+        //   // 如果输入框中内容不符合正则
+        //   if (!regexpObj[id].test($(this).val())) {
+        //     // 弹出提示框
+        //     notify(nameObj[id]+'中的内容不符合规范请修改');
+        //     status = (status - 1)>0?(status - 1):0;
+        //     return;
+        //   }
+        //   status += 1;
+        // });
+
+        btn.on('click', function() {
+          console.log('btn');
+          // 存储错误信息的数组
+          var msg = [];
+          $('form input').each(function(i, ele) {
+            let id = $(ele).attr('id');
+            if (!regexpObj[id].test($(ele).val())) {
+              msg[] = nameObj[id];
+            }
+          });
+
+          // 检查是否有报错
+          if (msg.length !== 0) {
+            notify('以下内容不符合规范请修改：' + msg.join(','));
+            return; // 结束执行
+          }
+
+          // 发起请求 存储数据
+          loadData(function(err,data)){
+            
+          }
+        });
+      }
+      addNavLink();
+      // TODO: 单条删除
+      // TODO: 单条删除
+      // TODO: 批量删除
+
+    });
+  </script>
+  <script>
+    NProgress.done()
+  </script>
 </body>
+
 </html>
