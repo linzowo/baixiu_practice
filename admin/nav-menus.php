@@ -262,7 +262,7 @@ bx_check_login_status();
               // });
 
             });
-          })
+          });
         });
       }
       
@@ -348,6 +348,38 @@ bx_check_login_status();
         // 检测deleteindex是否为空
         deleteIndex.length !== 0?batchDeletion.show():batchDeletion.hide();
         
+      });
+
+      // 为批量删除按钮注册点击事件
+      batchDeletion.on('click',function(){
+        // 获取数据
+        loadData(function(err,data){
+          if(err) return notify(err.message);
+
+          // 移除数据
+          deleteIndex.forEach(function(ele){
+            data.splice(ele,1);
+          });
+
+          // 将新数据存入数据库
+          saveData(data,function(err){
+           if(err) return notify(err.message);
+           
+           loadData(function(err){
+            if(err) return notify(err.message);
+
+            // 成功刷新页面数据
+            $('tbody').fadeOut().html($('#options_tmpl').render({
+              options: data
+            })).fadeIn();
+
+            // 清空删除数组
+            deleteIndex = [];
+            // 隐藏批量删除按钮
+            batchDeletion.hide();
+           });
+          });
+        });
       });
 
 
