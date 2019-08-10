@@ -41,6 +41,10 @@ bx_check_login_status();
           <form>
             <h2>添加新导航链接</h2>
             <div class="form-group">
+              <label for="icon">图标 Class</label>
+              <input id="icon" class="form-control" name="icon" type="text" placeholder="图标 Class">
+            </div>
+            <div class="form-group">
               <label for="text">文本</label>
               <input id="text" class="form-control" name="text" type="text" placeholder="文本">
             </div>
@@ -115,13 +119,13 @@ bx_check_login_status();
   <script src="/static/assets/vendors/jsrender/jsrender.js"></script>
   <script id="options_tmpl" type="text/x-jsrender">
     {{for options}}
-    <tr>
+    <tr data-index="{{: #index}}">
       <td class="text-center"><input type="checkbox"></td>
       <td><i class="{{:icon}}"></i>{{:text}}</td>
       <td>{{:title}}</td>
       <td>{{:link}}</td>
       <td class="text-center">
-        <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+        <a href="javascript:;" class="btn btn-danger btn-xs btn-delete">删除</a>
       </td>
     </tr>
     {{/for}}
@@ -141,6 +145,7 @@ bx_check_login_status();
     $(function() {
 
       // 动态加载设置数据
+      // =======================================
       /**
        * 获取nav_menus的数据
        * @param {function} callback 处理获取到的数据
@@ -164,19 +169,41 @@ bx_check_login_status();
           callback(null, menus);
         });
       }
+      
+      // 首次调用数据加载
       loadData(function(err, data) {
         if (err) return notify(err.message);
-        $('tbody').html($('#options_tmpl').render({
+        
+        $('tbody').fadeOut().html($('#options_tmpl').render({
           options: data
         })).fadeIn();
       });
 
-      // TODO: 新增设置
+
+      //  新增设置
+      // ====================================
+      /**
+       * 存储数据逻辑
+       */
+      function saveData(data,callback){
+        $.post('/admin/options.php', {
+          key: 'nav_menus',
+          value: JSON.stringify(data)
+        }, function(res) {
+          // 操作失败===>返回错误信息
+          if(!res.success) return callback(new Error(res.msg));
+          
+          // 操作成功就返回null
+          callback(null);
+        });
+      }
+
       function addNavLink() {
         // 获取按钮
         let btn = $('#submit');
         // 创建一个正则对照对象
         let regexpObj = {
+          'icon':/^[f][a]\s[a-z\-]+$/,
           'text': /^[^\s]{1,16}$/,
           'title': /^[^\s]{1,16}$/,
           'link': /^\/[a-z0-9]+\/[a-z0-9]+$/
@@ -184,6 +211,7 @@ bx_check_login_status();
 
         // 名称对照表
         let nameObj = {
+          'icon':'图标',
           'text': '文本',
           'title': '标题',
           'link': '连接'
@@ -193,9 +221,9 @@ bx_check_login_status();
           // 存储错误信息的数组
           let msg = [];
           // 存储用户输入的对象
-          let input = {
-            icon: "fa fa-glass"
-          };
+          let input = {};
+
+          // 遍历输入框
           $('form input').each(function(i, ele) {
             let id = $(ele).attr('id');
             if (!regexpObj[id].test($(ele).val())) {
@@ -212,28 +240,68 @@ bx_check_login_status();
 
           // 发起请求 存储数据
           loadData(function(err, data) {
+            // 获取数据失败就返回错误信息
+            if(err) return notify(err.message);
+
             // 将数据推入原始数据中
             data.push(input);
 
             // 发起请求更新数据
-            $.post('/admin/options.php', {
-              key: 'nav_menus',
-              value: JSON.stringify(data)
-            }, function(res) {
-              // 更新失败显示错误信息
-              if (!res.success) return notify(res.msg);
+            saveData(data,function(err){
+
+              if(err) return notify(err.message);
+
               // 成功刷新页面数据
-              $('tbody').html($('#options_tmpl').render({
+              $('tbody').fadeOut().html($('#options_tmpl').render({
                 options: data
               })).fadeIn();
+
+              // 清空新增表单
+              // $('form input').each(function(i, ele) {
+              //   $(ele).val('');
+              // });
+
             });
           })
         });
       }
+      
+      // 调用新增逻辑
       addNavLink();
+
       // TODO: 单条删除
-      // TODO: 单条删除
+      // ========================================
+      // 注册点击事件
+      $('tbody').on('click','.btn-delete',function(){
+        // 获取要删除的index
+        let index = parseInt($(this).parent().parent().data('index'));
+
+        // 获取现有表单数据
+        loadData(function(err,data){
+          if(err) return notify(err.message);
+
+          // 移除数据
+          data.splice(index,1);
+
+          // 将新数据存入数据库
+          saveData(data,function(err){
+           if(err) return notify(err.message);
+           
+           loadData(function(err){
+            if(err) return notify(err.message);
+
+            // 成功刷新页面数据
+            $('tbody').fadeOut().html($('#options_tmpl').render({
+              options: data
+            })).fadeIn();
+           });
+          });
+        });
+        
+      });
+      
       // TODO: 批量删除
+      
 
     });
   </script>
