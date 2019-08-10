@@ -49,8 +49,8 @@ bx_check_login_status();
               <input id="title" class="form-control" name="title" type="text" placeholder="标题">
             </div>
             <div class="form-group">
-              <label for="href">链接</label>
-              <input id="href" class="form-control" name="href" type="text" placeholder="链接">
+              <label for="link">链接</label>
+              <input id="link" class="form-control" name="link" type="text" placeholder="链接">
             </div>
             <div class="form-group">
               <a class="btn btn-primary" href="javascript:;" id="submit">添加</a>
@@ -139,23 +139,6 @@ bx_check_login_status();
     // 页面加载完成后执行
     // ============================
     $(function() {
-      // function loadData() {
-      //   $.get('/admin/options.php', {
-      //     key: 'nav_menus'
-      //   }, function(res) {
-      //     if (res['success']) {
-      //       // 使用模板字符串渲染数据
-      //       let tr = $('#options_tmpl').render({
-      //         options: JSON.parse(res['data'][0]['value'])
-      //       });
-      //       $('tbody').html(tr);
-      //       $('tbody').fadeIn();
-      //     } else {
-      //       notify(res['msg']);
-      //     }
-      //   });
-      // }
-      // loadData();
 
       // 动态加载设置数据
       /**
@@ -185,51 +168,40 @@ bx_check_login_status();
         if (err) return notify(err.message);
         $('tbody').html($('#options_tmpl').render({
           options: data
-        }));
+        })).fadeIn();
       });
 
       // TODO: 新增设置
       function addNavLink() {
-        // text title href
         // 获取按钮
         let btn = $('#submit');
-        // 为文本框注册检测事件
         // 创建一个正则对照对象
         let regexpObj = {
           'text': /^[^\s]{1,16}$/,
           'title': /^[^\s]{1,16}$/,
-          'href': /^\/[a-z0-9]+\/[a-z0-9]+$/
+          'link': /^\/[a-z0-9]+\/[a-z0-9]+$/
         }
 
         // 名称对照表
         let nameObj = {
           'text': '文本',
           'title': '标题',
-          'href': '连接'
+          'link': '连接'
         }
-        // 声明一个状态记录变量。记录现在有几个输入框通过了测试
-        // var status = 0;
-        // $('form').on('blur', 'input', function() {
-        //   let id = $(this).attr('id')
-        //   // 如果输入框中内容不符合正则
-        //   if (!regexpObj[id].test($(this).val())) {
-        //     // 弹出提示框
-        //     notify(nameObj[id]+'中的内容不符合规范请修改');
-        //     status = (status - 1)>0?(status - 1):0;
-        //     return;
-        //   }
-        //   status += 1;
-        // });
 
         btn.on('click', function() {
-          console.log('btn');
           // 存储错误信息的数组
-          var msg = [];
+          let msg = [];
+          // 存储用户输入的对象
+          let input = {
+            icon: "fa fa-glass"
+          };
           $('form input').each(function(i, ele) {
             let id = $(ele).attr('id');
             if (!regexpObj[id].test($(ele).val())) {
-              msg[] = nameObj[id];
+              msg.push(nameObj[id]);
             }
+            input[id] = $(ele).val();
           });
 
           // 检查是否有报错
@@ -239,9 +211,23 @@ bx_check_login_status();
           }
 
           // 发起请求 存储数据
-          loadData(function(err,data)){
-            
-          }
+          loadData(function(err, data) {
+            // 将数据推入原始数据中
+            data.push(input);
+
+            // 发起请求更新数据
+            $.post('/admin/options.php', {
+              key: 'nav_menus',
+              value: JSON.stringify(data)
+            }, function(res) {
+              // 更新失败显示错误信息
+              if (!res.success) return notify(res.msg);
+              // 成功刷新页面数据
+              $('tbody').html($('#options_tmpl').render({
+                options: data
+              })).fadeIn();
+            });
+          })
         });
       }
       addNavLink();
