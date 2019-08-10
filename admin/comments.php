@@ -353,7 +353,27 @@ bx_check_login_status();
       // 获取当前点击元素
       var current_box = $(this);
       var id = current_box.parent().parent().data('id');
-      (current_box.prop('checked') && batch_data_arr.indexOf(id) === -1) ? batch_data_arr.push(id) : batch_data_arr.splice(batch_data_arr.indexOf(id), 1);
+
+      // 非选中状态
+      if(!current_box.prop('checked')){
+        batch_data_arr.splice(batch_data_arr.indexOf(id), 1);
+        checked_all_obj.prop('checked',false);
+        return;
+      }
+
+      // 选中状态
+      batch_data_arr.indexOf(id) === -1?batch_data_arr.push(id):'';
+
+      // 检查所有选择框是否全部选中
+      // 默认全选
+      checked_all_obj.prop('checked',true);
+      // 存在没有选中的就取消全选
+      $('tbody input').each(function(i,ele){
+        if(!$(ele).prop('checked')){
+          checked_all_obj.prop('checked',false);
+          return false;
+        }
+      });
       batch_data_arr.length>0?$('#btn_batch').show():$('#btn_batch').hide();
     })
     // 为按钮注册点击事件

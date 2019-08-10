@@ -64,11 +64,11 @@ bx_check_login_status();
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
-            <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
+            <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none" id="batch_deletion">批量删除</a>
           </div>
           <table class="table table-striped table-bordered table-hover">
-            <thead>
-              <tr>
+              <thead>
+                <tr>
                 <th class="text-center" width="40"><input type="checkbox"></th>
                 <th>文本</th>
                 <th>标题</th>
@@ -269,7 +269,7 @@ bx_check_login_status();
       // 调用新增逻辑
       addNavLink();
 
-      // TODO: 单条删除
+      // 单条删除
       // ========================================
       // 注册点击事件
       $('tbody').on('click','.btn-delete',function(){
@@ -301,7 +301,55 @@ bx_check_login_status();
       });
       
       // TODO: 批量删除
-      
+      // ================================================
+      // 删除按钮
+      var batchDeletion = $('#batch_deletion');
+
+      // 必要元素
+      var checkedAll = $('thead input');
+
+      // 结果数组
+      var deleteIndex = [];
+
+      // 注册事件
+
+      // 全选
+      checkedAll.on('change',function(){
+        $('tbody input').prop('checked',$(this).prop('checked')).change();
+      });
+
+      // 单选
+      $('tbody').on('change','input',function(){
+        // 获取当前点击的索引值
+        let index = $(this).parent().parent().data('index');
+        
+        // 根据选择===>新增还是删除index
+        // 删除
+        if(!$(this).prop('checked')){
+          deleteIndex.splice(deleteIndex.indexOf(index),1);
+          checkedAll.prop('checked',false);
+          deleteIndex.length !== 0?batchDeletion.show():batchDeletion.hide();
+          return;
+        }
+
+        // 新增
+        deleteIndex.indexOf(index) == -1?deleteIndex.push(index):'';
+
+        // 默认全选
+        checkedAll.prop('checked',true);
+
+        // 检查是否为全选
+        $('tbody input').each(function(i,ele){
+          if(!$(ele).prop('checked')){
+            checkedAll.prop('checked',false);
+            return false;
+          }
+        });
+        // 检测deleteindex是否为空
+        deleteIndex.length !== 0?batchDeletion.show():batchDeletion.hide();
+        
+      });
+
 
     });
   </script>
