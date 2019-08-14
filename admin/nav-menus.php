@@ -256,10 +256,10 @@ bx_check_login_status();
                 options: data
               })).fadeIn();
 
-              // 清空新增表单
-              // $('form input').each(function(i, ele) {
-              //   $(ele).val('');
-              // });
+              清空新增表单
+              $('form input').each(function(i, ele) {
+                $(ele).val('');
+              });
 
             });
           });
@@ -300,7 +300,7 @@ bx_check_login_status();
         
       });
       
-      // TODO: 批量删除
+      // 批量删除
       // ================================================
       // 删除按钮
       var batchDeletion = $('#batch_deletion');
@@ -356,6 +356,8 @@ bx_check_login_status();
         loadData(function(err,data){
           if(err) return notify(err.message);
 
+          // 将所有要删除的索引按照倒序排列===》防止遍历删除的时候出现无法删除的bug
+          deleteIndex.sort(function(a,b){ return b - a; });
           // 移除数据
           deleteIndex.forEach(function(ele){
             data.splice(ele,1);

@@ -1,5 +1,20 @@
+<!-- <body>
+  <div class="father"></div>
+</body> -->
+
 <script src="../static/assets/vendors/jquery/jquery.js"></script>
 <script>
+  // for(var i = 0 ;i < 10; i++){
+  //   // 动态生成子元素
+  //   var children = $('<div class="children">你好啊</div>')
+  //   // 将子元素加入父元素
+  //   children.appendTo($('.father'));
+  // }
+  // // 为子元素注册事件
+  // $('.father').on('click','.children',function(){
+  //   // 输出所有子元素
+  //   console.log($('.father .children'));
+  // });
   //   localStorage.setItem('page',1);
 
   // if(localStorage.getItem('page')){
@@ -398,8 +413,8 @@ $add_sql = sprintf(
 // $img_path = '/'.join('/',$path_arr);
 // echo $img_path;
 
-$target_folder = "../../baixiu/admin/profile.php";
-$path_arr = explode('../',$target_folder);
-var_dump($path_arr);
-$img_path = end($path_arr);
-echo $img_path;
+// $target_folder = "../../baixiu/admin/profile.php";
+// $path_arr = explode('../',$target_folder);
+// var_dump($path_arr);
+// $img_path = end($path_arr);
+// echo $img_path;

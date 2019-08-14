@@ -1,5 +1,7 @@
 <?php
 
+// 引入配置文件
+require_once 'config.php';
 /**
  * 声明公共函数区域
  */
@@ -183,6 +185,9 @@ function bx_get_paging($max_page, $format, $visibles = 5)
  */
 function bx_check_upload_img($file_name, $upload_folder)
 {
+    // 引入配置文件
+    require_once 'config.php';
+    
     if (!substr_count($_FILES[$file_name]['type'], 'image')) { // 检查是否是图片类型
         return false;
     }
