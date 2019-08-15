@@ -181,7 +181,7 @@ bx_check_login_status();
         let formData = new FormData();
         formData.append('file',file);
         $.ajax({
-          url: '/admin/api/slides-img-save.php',
+          url: '/admin/api/slides-or-settings-img-save.php',
           cache: false,
           contentType: false,
           processData: false,

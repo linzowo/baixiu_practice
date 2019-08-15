@@ -7,7 +7,7 @@ require_once '../../function.php';
 
 // 如果选择了文件:$_FILES['file']['error'] => 0
 if(empty($_FILES['file']['error'])){
-    $upload_folder = '../../static/uploads';
+    $upload_folder = empty($_POST['upload_folder'])?'../../static/uploads':$_POST['upload_folder'];
     $img_path = bx_check_upload_img('file',$upload_folder);
 }
 
